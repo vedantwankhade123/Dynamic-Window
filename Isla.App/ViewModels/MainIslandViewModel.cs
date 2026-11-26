@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Isla.Core.Interfaces;
 using Isla.Core.Models;
+using Isla.Core.Services;
 using Microsoft.UI.Dispatching;
 
 namespace Isla.App.ViewModels;
@@ -15,7 +17,7 @@ public partial class MainIslandViewModel : ObservableObject
     private readonly ISystemMonitorService _systemMonitorService;
     private readonly IAiService _aiService;
     private readonly ISettingsService _settingsService;
-    private readonly IDemoController _demoController;
+    private readonly ITimerService _timerService;
 
     private DispatcherQueue? _dispatcherQueue;
 
@@ -44,7 +46,7 @@ public partial class MainIslandViewModel : ObservableObject
     private bool _isAiSending;
 
     [ObservableProperty]
-    private string _dashboardSection = "Overview";
+    private int _customTimerMinutes = 10;
 
     public ObservableCollection<ActivityItem> Activities { get; } = new();
     public ObservableCollection<NotificationItem> Notifications { get; } = new();
@@ -67,10 +69,9 @@ public partial class MainIslandViewModel : ObservableObject
     public bool IsAiOrOtherPrimary => PrimaryActivity is not null && !IsMusicPrimary && !IsTimerPrimary && !IsScreenRecordingPrimary && !IsFocusAssistPrimary && !IsLowBatteryPrimary && !IsBluetoothPrimary && !IsIncomingCallPrimary && !IsTransferOrBuildPrimary;
     public bool IsNonMusicPrimary => PrimaryActivity is not null && PrimaryActivity.Type != ActivityType.Music;
 
-    public string TimerDisplay => PrimaryActivity?.Metadata.TryGetValue("Remaining", out var rem) == true ? rem : "0:22";
-
-    public string CompactTitle => PrimaryActivity?.Title ?? "Isla Ready";
-    public string CompactSubtitle => PrimaryActivity?.Subtitle ?? "No active tasks";
+    public string TimerDisplay => PrimaryActivity?.Metadata.TryGetValue("Remaining", out var rem) == true ? rem : "0:00";
+    public string CompactTitle => PrimaryActivity?.Title ?? "Isla";
+    public string CompactSubtitle => PrimaryActivity?.Subtitle ?? "Ready";
     public double CompactProgress => PrimaryActivity?.Progress ?? 0;
     public bool HasCompactProgress => Settings.ShowProgressInCompact && PrimaryActivity?.Progress is not null;
 
@@ -81,7 +82,7 @@ public partial class MainIslandViewModel : ObservableObject
         ISystemMonitorService systemMonitorService,
         IAiService aiService,
         ISettingsService settingsService,
-        IDemoController demoController)
+        ITimerService timerService)
     {
         _activityService = activityService;
         _musicService = musicService;
@@ -89,7 +90,7 @@ public partial class MainIslandViewModel : ObservableObject
         _systemMonitorService = systemMonitorService;
         _aiService = aiService;
         _settingsService = settingsService;
-        _demoController = demoController;
+        _timerService = timerService;
 
         _currentTrack = _musicService.CurrentTrack;
         _systemStats = _systemMonitorService.CurrentStats;
@@ -124,21 +125,12 @@ public partial class MainIslandViewModel : ObservableObject
         });
     }
 
-    public void AttachDispatcher(DispatcherQueue dispatcherQueue)
-    {
-        _dispatcherQueue = dispatcherQueue;
-    }
+    public void AttachDispatcher(DispatcherQueue dispatcherQueue) => _dispatcherQueue = dispatcherQueue;
 
     private void RunOnUi(Action action)
     {
-        if (_dispatcherQueue is not null)
-        {
-            _dispatcherQueue.TryEnqueue(() => action());
-        }
-        else
-        {
-            action();
-        }
+        if (_dispatcherQueue is not null) _dispatcherQueue.TryEnqueue(() => action());
+        else action();
     }
 
     partial void OnVisualStateChanged(IslandVisualState value)
@@ -166,10 +158,7 @@ public partial class MainIslandViewModel : ObservableObject
 
     partial void OnSelectedAiModelChanged(AiModelOption value)
     {
-        if (value is not null)
-        {
-            _aiService.SelectedModel = value;
-        }
+        if (value is not null) _aiService.SelectedModel = value;
     }
 
     private void NotifyCompactProperties()
@@ -183,12 +172,12 @@ public partial class MainIslandViewModel : ObservableObject
     private void InitializeQuickControls()
     {
         QuickControls.Clear();
-        QuickControls.Add(new QuickControlItem { Id = "wifi", Title = "Wi-Fi", Subtitle = "IslaNet-5G", IconGlyph = "\uE701", IsActive = true, IsPrototypeOnly = true });
-        QuickControls.Add(new QuickControlItem { Id = "bt", Title = "Bluetooth", Subtitle = "2 connected", IconGlyph = "\uE702", IsActive = true, IsPrototypeOnly = true });
-        QuickControls.Add(new QuickControlItem { Id = "night", Title = "Night Light", Subtitle = "Off", IconGlyph = "\uE708", IsActive = false, IsPrototypeOnly = true });
-        QuickControls.Add(new QuickControlItem { Id = "focus", Title = "Focus Mode", Subtitle = "Do Not Disturb", IconGlyph = "\uE706", IsActive = false, IsPrototypeOnly = true });
-        QuickControls.Add(new QuickControlItem { Id = "shot", Title = "Screenshot", Subtitle = "Snipping Tool", IconGlyph = "\uE722", IsActive = false, IsPrototypeOnly = true });
-        QuickControls.Add(new QuickControlItem { Id = "settings", Title = "Settings", Subtitle = "Preferences", IconGlyph = "\uE713", IsActive = false, IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "snip", Title = "Screenshot", Subtitle = "Snipping Tool", IconGlyph = "\uE722", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "sound", Title = "Sound", Subtitle = "Windows Audio", IconGlyph = "\uE767", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "bt", Title = "Bluetooth", Subtitle = "Devices", IconGlyph = "\uE702", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "focus", Title = "Focus Assist", Subtitle = "Windows DND", IconGlyph = "\uE708", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "manage", Title = "Manage Isla", Subtitle = "Control Center", IconGlyph = "\uE9E9", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "settings", Title = "Settings", Subtitle = "Preferences", IconGlyph = "\uE713", IsPrototypeOnly = false });
     }
 
     private void RefreshAllCollections()
@@ -204,10 +193,7 @@ public partial class MainIslandViewModel : ObservableObject
     private void RefreshActivities()
     {
         Activities.Clear();
-        foreach (var act in _activityService.Activities)
-        {
-            Activities.Add(act);
-        }
+        foreach (var act in _activityService.Activities) Activities.Add(act);
         PrimaryActivity = _activityService.PrimaryActivity;
         NotifyCompactProperties();
     }
@@ -215,97 +201,66 @@ public partial class MainIslandViewModel : ObservableObject
     private void RefreshNotifications()
     {
         Notifications.Clear();
-        foreach (var n in _notificationService.Notifications)
-        {
-            Notifications.Add(n);
-        }
+        foreach (var n in _notificationService.Notifications) Notifications.Add(n);
     }
 
     private void RefreshAiMessages()
     {
         AiMessages.Clear();
-        foreach (var msg in _aiService.Messages)
-        {
-            AiMessages.Add(msg);
-        }
+        foreach (var msg in _aiService.Messages) AiMessages.Add(msg);
     }
 
-    [RelayCommand]
-    private void SetState(IslandVisualState state) => VisualState = state;
+    [RelayCommand] private void SetState(IslandVisualState state) => VisualState = state;
+    [RelayCommand] private void ToggleExpand() => VisualState = VisualState == IslandVisualState.Compact ? IslandVisualState.Expanded : IslandVisualState.Compact;
+    [RelayCommand] private void OpenDashboard() => VisualState = IslandVisualState.Dashboard;
+    [RelayCommand] private void Collapse() => VisualState = IslandVisualState.Compact;
 
-    [RelayCommand]
-    private void ToggleExpand()
-    {
-        VisualState = VisualState == IslandVisualState.Compact
-            ? IslandVisualState.Expanded
-            : IslandVisualState.Compact;
-    }
-
-    [RelayCommand]
-    private void OpenDashboard() => VisualState = IslandVisualState.Dashboard;
-
-    [RelayCommand]
-    private void Collapse() => VisualState = IslandVisualState.Compact;
-
-    [RelayCommand]
-    private void TogglePlayPause() => _musicService.TogglePlayPause();
-
-    [RelayCommand]
-    private void NextTrack() => _musicService.NextTrack();
-
-    [RelayCommand]
-    private void PreviousTrack() => _musicService.PreviousTrack();
+    [RelayCommand] private void TogglePlayPause() => _musicService.TogglePlayPause();
+    [RelayCommand] private void NextTrack() => _musicService.NextTrack();
+    [RelayCommand] private void PreviousTrack() => _musicService.PreviousTrack();
 
     [RelayCommand]
     private void SelectActivity(string activityId)
     {
         _activityService.SetPrimaryActivity(activityId);
-        if (VisualState == IslandVisualState.Compact)
-        {
-            VisualState = IslandVisualState.Expanded;
-        }
+        if (VisualState == IslandVisualState.Compact) VisualState = IslandVisualState.Expanded;
     }
 
     [RelayCommand]
     private void ExecuteActivityAction(string actionId)
     {
-        if (PrimaryActivity is not null)
-        {
-            _activityService.ExecuteAction(PrimaryActivity.Id, actionId);
-        }
+        if (PrimaryActivity is not null) _activityService.ExecuteAction(PrimaryActivity.Id, actionId);
     }
 
     [RelayCommand]
     private void ToggleQuickControl(QuickControlItem? item)
     {
         if (item is null) return;
-        if (item.Id == "settings")
+        switch (item.Id)
         {
-            App.OpenSettingsWindow();
-            return;
-        }
-
-        item.IsActive = !item.IsActive;
-        item.Subtitle = item.Id switch
-        {
-            "wifi" => item.IsActive ? "IslaNet-5G [Sim]" : "Disconnected [Sim]",
-            "bt" => item.IsActive ? "2 connected [Sim]" : "Off [Sim]",
-            "night" => item.IsActive ? "Warm 4200K [Sim]" : "Off [Sim]",
-            "focus" => item.IsActive ? "Active [Sim]" : "Off [Sim]",
-            _ => item.Subtitle
-        };
-        var idx = QuickControls.IndexOf(item);
-        if (idx >= 0)
-        {
-            QuickControls[idx] = item;
+            case "settings": App.OpenSettingsWindow(); break;
+            case "manage": App.OpenManageWindow(); break;
+            case "snip": LaunchUri("ms-screenclip:"); break;
+            case "sound": LaunchUri("ms-settings:sound"); break;
+            case "bt": LaunchUri("ms-settings:bluetooth"); break;
+            case "focus": LaunchUri("ms-settings:quiethours"); break;
         }
     }
 
-    [RelayCommand]
-    private void DismissNotification(string id) => _notificationService.DismissNotification(id);
+    private static void LaunchUri(string uri)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
+        }
+        catch
+        {
+            // Ignore if URI handler unavailable
+        }
+    }
 
-    [RelayCommand]
-    private void ClearNotifications() => _notificationService.ClearAll();
+    [RelayCommand] private void DismissNotification(string id) => _notificationService.DismissNotification(id);
+    [RelayCommand] private void ClearNotifications() => _notificationService.ClearAll();
 
     [RelayCommand]
     private async Task SendAiPromptAsync()
@@ -314,34 +269,19 @@ public partial class MainIslandViewModel : ObservableObject
         var prompt = AiPromptText;
         AiPromptText = string.Empty;
         IsAiSending = true;
-        try
-        {
-            await _aiService.SendMessageAsync(prompt);
-        }
-        finally
-        {
-            IsAiSending = false;
-        }
+        try { await _aiService.SendMessageAsync(prompt); }
+        finally { IsAiSending = false; }
     }
 
-    // Demo triggers accessible from Dashboard & Demo Window (switch to Expanded to preview immediately)
-    [RelayCommand] private void DemoMusic() { _demoController.StartMusicDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoDownload() { _demoController.StartDownloadDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoTimer() { _demoController.StartTimerDemo(90); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoCompleteTimer() { _demoController.CompleteTimerDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoPomodoro() { _demoController.StartPomodoroDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoAiTask() { _demoController.StartAiTaskDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoFileOp() { _demoController.StartFileOperationDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoAppInstall() { _demoController.StartAppInstallDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoCustomDev() { _demoController.StartCustomDevDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoScreenRecording() { _demoController.StartScreenRecordingDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoFocusAssist() { _demoController.StartFocusAssistDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoLowBattery() { _demoController.StartLowBatteryDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoBluetooth() { _demoController.StartBluetoothDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoIncomingCall() { _demoController.StartIncomingCallDemo(); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoNotification(string kind) { _demoController.SimulateNotification(kind); VisualState = IslandVisualState.Expanded; }
-    [RelayCommand] private void DemoSpike() => _demoController.TriggerSystemSpike();
-    [RelayCommand] private void DemoReset() => _demoController.ResetDemoData();
+    // Real Timer & Pomodoro controls
+    [RelayCommand] private void StartTimer5Min() { _timerService.StartTimer(300, "5m Timer"); VisualState = IslandVisualState.Expanded; }
+    [RelayCommand] private void StartTimer15Min() { _timerService.StartTimer(900, "15m Timer"); VisualState = IslandVisualState.Expanded; }
+    [RelayCommand] private void StartPomodoro25Min() { _timerService.StartTimer(1500, "Pomodoro • Deep Work", true); VisualState = IslandVisualState.Expanded; }
+    [RelayCommand] private void StartCustomTimer() { _timerService.StartTimer(Math.Max(1, CustomTimerMinutes) * 60, $"{CustomTimerMinutes}m Focus"); VisualState = IslandVisualState.Expanded; }
+    [RelayCommand] private void ToggleTimerPause() => _timerService.TogglePauseResume();
+    [RelayCommand] private void StopTimer() => _timerService.StopTimer();
+
+    [RelayCommand] private async Task SaveQuickSettingsAsync() => await _settingsService.SaveAsync(Settings);
     [RelayCommand] private void OpenSettings() => App.OpenSettingsWindow();
-    [RelayCommand] private void OpenDemoPanel() => App.OpenDemoWindow();
+    [RelayCommand] private void OpenManage() => App.OpenManageWindow();
 }

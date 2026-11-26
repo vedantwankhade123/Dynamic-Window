@@ -1,0 +1,233 @@
+<Window
+    x:Class="Isla.App.Views.ManageWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="using:Isla.App.Converters"
+    Title="Isla — Control &amp; Management Center">
+
+    <Grid Background="{StaticResource IslaSurfaceBrush}" Padding="24" RowSpacing="18">
+        <Grid.Resources>
+            <conv:HexToBrushConverter x:Key="HexToBrush" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header Bar -->
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Border Width="34" Height="34" CornerRadius="17" Background="#000000" BorderBrush="#26FFFFFF" BorderThickness="1">
+                    <FontIcon Glyph="&#xE945;" FontSize="15" Foreground="{StaticResource IslaAccentBrush}" />
+                </Border>
+                <StackPanel Spacing="1">
+                    <TextBlock Text="Isla Control &amp; Management" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" />
+                    <TextBlock Text="Manage live Windows activities, timers, island placement, and system telemetry" FontSize="12" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="Compact" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding CollapseCommand}" />
+                <Button Content="Expanded" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding ToggleExpandCommand}" />
+                <Button Content="Dashboard" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding OpenDashboardCommand}" />
+                <Button Content="All Settings" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding OpenSettingsCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Management Grid -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Timers, Active Activities, Windows Shortcuts -->
+                <StackPanel Grid.Column="0" Spacing="14">
+                    <!-- Focus & Timers -->
+                    <Border Background="{StaticResource IslaCardGradientBrush}" BorderBrush="{StaticResource IslaBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="FOCUS &amp; TIMERS" Style="{StaticResource IslaSectionHeaderStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="5 min" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding StartTimer5MinCommand}" />
+                                <Button Content="15 min" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding StartTimer15MinCommand}" />
+                                <Button Content="25 min Pomodoro" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding StartPomodoro25MinCommand}" />
+                            </StackPanel>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <NumberBox Grid.Column="0" Value="{Binding CustomTimerMinutes, Mode=TwoWay}" Minimum="1" Maximum="180" Width="90" />
+                                <Button Grid.Column="1" Content="Start Custom (min)" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding StartCustomTimerCommand}" />
+                                <Button Grid.Column="2" Content="Pause/Resume" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding ToggleTimerPauseCommand}" />
+                                <Button Grid.Column="3" Content="Stop" Style="{StaticResource IslaPillButtonStyle}" Command="{Binding StopTimerCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Live Activities -->
+                    <Border Background="{StaticResource IslaCardGradientBrush}" BorderBrush="{StaticResource IslaBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                        <StackPanel Spacing="10">
+                            <Grid>
+                                <TextBlock Text="ACTIVE WINDOWS ACTIVITIES" Style="{StaticResource IslaSectionHeaderStyle}" />
+                                <TextBlock Text="Click to focus in Island" FontSize="10.5" Foreground="{StaticResource IslaTextMutedBrush}" HorizontalAlignment="Right" />
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding Activities}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Background="#12FFFFFF"
+                                            BorderBrush="#18FFFFFF"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="12,8"
+                                            Margin="0,0,0,6"
+                                            Tag="{Binding Id}"
+                                            Click="OnActivityFocusClick">
+                                            <Grid ColumnSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <FontIcon Grid.Column="0" Glyph="{Binding IconGlyph}" FontSize="14" Foreground="{Binding AccentHex, Converter={StaticResource HexToBrush}}" />
+                                                <StackPanel Grid.Column="1" Spacing="1">
+                                                    <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" />
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="10.5" Foreground="{StaticResource IslaTextMutedBrush}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Windows Quick Actions -->
+                    <Border Background="{StaticResource IslaCardGradientBrush}" BorderBrush="{StaticResource IslaBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="WINDOWS SYSTEM TOOLS" Style="{StaticResource IslaSectionHeaderStyle}" />
+                            <ItemsControl ItemsSource="{Binding QuickControls}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="128" ItemHeight="52" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button
+                                            Margin="3"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            HorizontalContentAlignment="Left"
+                                            Background="#14FFFFFF"
+                                            BorderBrush="#1AFFFFFF"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="10,6"
+                                            Click="OnQuickControlClick">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="{Binding IconGlyph}" FontSize="14" Foreground="{StaticResource IslaAccentBrush}" />
+                                                <StackPanel Spacing="0">
+                                                    <TextBlock Text="{Binding Title}" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" />
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="9.5" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Right Column: Real System Telemetry + Quick Island Configuration -->
+                <StackPanel Grid.Column="1" Spacing="14">
+                    <!-- Real System Telemetry -->
+                    <Border Background="{StaticResource IslaCardGradientBrush}" BorderBrush="{StaticResource IslaBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="LIVE SYSTEM TELEMETRY (WINDOWS API)" Style="{StaticResource IslaSectionHeaderStyle}" />
+                            <Grid ColumnSpacing="12" RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
+                                    <TextBlock Text="CPU Usage" FontSize="11" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <TextBlock Text="{Binding SystemStats.CpuUsagePercent}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" />
+                                        <TextBlock Text="%" FontSize="13" Foreground="{StaticResource IslaTextSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                    </StackPanel>
+                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.CpuUsagePercent}" Height="4" CornerRadius="2" Foreground="#60A5FA" Background="#1FFFFFFF" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
+                                    <TextBlock Text="Memory (RAM)" FontSize="11" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="{Binding SystemStats.RamUsedGb}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" />
+                                        <TextBlock Text="/" FontSize="13" Foreground="{StaticResource IslaTextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding SystemStats.RamTotalGb}" FontSize="13" Foreground="{StaticResource IslaTextSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="GB" FontSize="12" Foreground="{StaticResource IslaTextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                    </StackPanel>
+                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.RamUsagePercent}" Height="4" CornerRadius="2" Foreground="#818CF8" Background="#1FFFFFFF" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
+                                    <TextBlock Text="Battery" FontSize="11" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <TextBlock Text="{Binding SystemStats.BatteryPercent}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" />
+                                        <TextBlock Text="%" FontSize="13" Foreground="{StaticResource IslaTextSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                    </StackPanel>
+                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.BatteryPercent}" Height="4" CornerRadius="2" Foreground="#34D399" Background="#1FFFFFFF" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
+                                    <TextBlock Text="Network (Mbps)" FontSize="11" Foreground="{StaticResource IslaTextSecondaryBrush}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding SystemStats.NetworkDownMbps}" FontSize="15" FontWeight="SemiBold" Foreground="#34D399" />
+                                        <TextBlock Text="↓" FontSize="13" Foreground="#34D399" />
+                                        <TextBlock Text="{Binding SystemStats.NetworkUpMbps}" FontSize="15" FontWeight="SemiBold" Foreground="#60A5FA" />
+                                        <TextBlock Text="↑" FontSize="13" Foreground="#60A5FA" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Quick Island Configuration -->
+                    <Border Background="{StaticResource IslaCardGradientBrush}" BorderBrush="{StaticResource IslaBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="ISLAND CONFIGURATION" Style="{StaticResource IslaSectionHeaderStyle}" />
+                            <ToggleSwitch Header="Island Visible" IsOn="{Binding Settings.IsIslandEnabled, Mode=TwoWay}" />
+                            <ToggleSwitch Header="Click Outside to Collapse" IsOn="{Binding Settings.ClickOutsideToCollapse, Mode=TwoWay}" />
+                            <ToggleSwitch Header="Drag to Reposition" IsOn="{Binding Settings.DragToReposition, Mode=TwoWay}" />
+                            <Slider Header="Compact Width (px)" Minimum="180" Maximum="300" StepFrequency="4" Value="{Binding Settings.CompactWidth, Mode=TwoWay}" />
+                            <Slider Header="Compact Height (px)" Minimum="38" Maximum="60" StepFrequency="2" Value="{Binding Settings.CompactHeight, Mode=TwoWay}" />
+                            <Slider Header="Island Opacity" Minimum="0.5" Maximum="1.0" StepFrequency="0.02" Value="{Binding Settings.IslandOpacity, Mode=TwoWay}" />
+                            <Button
+                                Content="Apply &amp; Save to SQLite"
+                                HorizontalAlignment="Right"
+                                Background="{StaticResource IslaAccentBrush}"
+                                Foreground="{StaticResource IslaVoidBrush}"
+                                CornerRadius="14"
+                                Padding="14,6"
+                                FontWeight="SemiBold"
+                                Command="{Binding SaveQuickSettingsCommand}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Window>

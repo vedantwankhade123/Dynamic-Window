@@ -22,16 +22,13 @@
                     <FontIcon Glyph="&#xE945;" FontSize="12" Foreground="{StaticResource IslaAccentBrush}" />
                 </Border>
                 <TextBlock Text="Isla Dashboard" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource IslaTextPrimaryBrush}" VerticalAlignment="Center" />
-                <Border Background="#1460A5FA" CornerRadius="6" Padding="6,2" VerticalAlignment="Center">
-                    <TextBlock Text="PHASE 1 PROTOTYPE" FontSize="9.5" FontWeight="SemiBold" Foreground="{StaticResource IslaAccentBrush}" />
-                </Border>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                <Button Style="{StaticResource IslaPillButtonStyle}" Command="{Binding OpenDemoPanelCommand}">
+                <Button Style="{StaticResource IslaPillButtonStyle}" Command="{Binding OpenManageCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="5">
-                        <FontIcon Glyph="&#xE768;" FontSize="10.5" Foreground="#34D399" />
-                        <TextBlock Text="Demo" FontSize="11" />
+                        <FontIcon Glyph="&#xE9E9;" FontSize="10.5" Foreground="{StaticResource IslaAccentBrush}" />
+                        <TextBlock Text="Manage" FontSize="11" />
                     </StackPanel>
                 </Button>
                 <Button Style="{StaticResource IslaIconButtonStyle}" Width="28" Height="28" Command="{Binding OpenSettingsCommand}" ToolTipService.ToolTip="Settings">
@@ -117,7 +114,7 @@
                         <StackPanel Spacing="10">
                             <Grid>
                                 <TextBlock Text="QUICK CONTROLS" Style="{StaticResource IslaSectionHeaderStyle}" />
-                                <TextBlock Text="Simulated in Phase 1" FontSize="10" Foreground="{StaticResource IslaTextMutedBrush}" HorizontalAlignment="Right" />
+                                <TextBlock Text="Windows Tools" FontSize="10" Foreground="{StaticResource IslaTextMutedBrush}" HorizontalAlignment="Right" />
                             </Grid>
                             <ItemsControl ItemsSource="{Binding QuickControls}">
                                 <ItemsControl.ItemsPanel>

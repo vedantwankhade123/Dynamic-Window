@@ -19,8 +19,8 @@
 
             <Grid Grid.Row="0">
                 <TextBlock Text="SYSTEM OVERVIEW" Style="{StaticResource IslaSectionHeaderStyle}" VerticalAlignment="Center" />
-                <Border Background="#1460A5FA" CornerRadius="6" Padding="6,2" HorizontalAlignment="Right">
-                    <TextBlock Text="SIMULATED" FontSize="9" FontWeight="SemiBold" Foreground="{StaticResource IslaAccentBrush}" />
+                <Border Background="#1434D399" CornerRadius="6" Padding="6,2" HorizontalAlignment="Right">
+                    <TextBlock Text="LIVE" FontSize="9" FontWeight="SemiBold" Foreground="#34D399" />
                 </Border>
             </Grid>
 

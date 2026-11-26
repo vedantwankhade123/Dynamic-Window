@@ -23,8 +23,8 @@
                     <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE80F;" /></MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Demo Controller..." Command="{Binding OpenDemoPanelCommand}">
-                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE768;" /></MenuFlyoutItem.Icon>
+                <MenuFlyoutItem Text="Manage Isla..." Command="{Binding OpenManageCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE9E9;" /></MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem Text="Settings..." Command="{Binding OpenSettingsCommand}">
                     <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE713;" /></MenuFlyoutItem.Icon>

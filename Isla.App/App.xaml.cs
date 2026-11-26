@@ -2,6 +2,8 @@ using Isla.App.ViewModels;
 using Isla.App.Views;
 using Isla.Core.Interfaces;
 using Isla.Infrastructure.DependencyInjection;
+using Isla.Windows.Media;
+using Isla.Windows.SystemMonitoring;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -12,7 +14,7 @@ public partial class App : Application
 {
     private Window? _mainWindow;
     private SettingsWindow? _settingsWindow;
-    private DemoWindow? _demoWindow;
+    private ManageWindow? _manageWindow;
 
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -22,6 +24,8 @@ public partial class App : Application
 
         var services = new ServiceCollection();
         services.AddIslaCoreServices();
+        services.AddSingleton<IMusicService, WindowsMediaService>();
+        services.AddSingleton<ISystemMonitorService, WindowsSystemMonitorService>();
         services.AddSingleton<MainIslandViewModel>();
         services.AddTransient<SettingsViewModel>();
         Services = services.BuildServiceProvider();
@@ -43,7 +47,7 @@ public partial class App : Application
 
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
-        OpenDemoWindow();
+        OpenManageWindow();
     }
 
     public static void OpenSettingsWindow()
@@ -58,15 +62,15 @@ public partial class App : Application
         app._settingsWindow.Activate();
     }
 
-    public static void OpenDemoWindow()
+    public static void OpenManageWindow()
     {
         if (Current is not App app) return;
 
-        if (app._demoWindow is null)
+        if (app._manageWindow is null)
         {
-            app._demoWindow = new DemoWindow();
-            app._demoWindow.Closed += (_, _) => app._demoWindow = null;
+            app._manageWindow = new ManageWindow();
+            app._manageWindow.Closed += (_, _) => app._manageWindow = null;
         }
-        app._demoWindow.Activate();
+        app._manageWindow.Activate();
     }
 }

@@ -84,7 +84,7 @@
                 </Button>
                 <TextBox
                     Grid.Column="2"
-                    PlaceholderText="Ask Isla AI (simulated)..."
+                    PlaceholderText="Ask Isla AI (Ollama)..."
                     Text="{Binding AiPromptText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     FontSize="12"
                     CornerRadius="12" />

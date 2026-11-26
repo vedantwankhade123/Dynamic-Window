@@ -35,18 +35,21 @@ public sealed class CoreAndSettingsTests
     }
 
     [Fact]
-    public void MockDemoService_SimulatesMusicAndDownload()
+    public void RealTimerService_StartsPausesAndStopsTimer()
     {
         var manager = new ActivityManager();
-        using var demo = new MockDemoService(manager);
+        using var timerService = new RealTimerAndNotificationService(manager);
 
-        Assert.Equal("Midnight City (M83 Rework)", demo.CurrentTrack.Title);
+        timerService.StartTimer(120, "Deep Focus");
+        Assert.True(timerService.IsRunning);
+        Assert.Equal(120, timerService.RemainingSeconds);
+        Assert.Equal("isla-timer", manager.PrimaryActivity?.Id);
 
-        demo.StartDownloadDemo();
-        Assert.Equal("demo-download", manager.PrimaryActivity?.Id);
+        timerService.TogglePauseResume();
+        Assert.False(timerService.IsRunning);
 
-        demo.NextTrack();
-        Assert.Equal("Resonance", demo.CurrentTrack.Title);
+        timerService.StopTimer();
+        Assert.Null(manager.PrimaryActivity);
     }
 
     [Fact]
