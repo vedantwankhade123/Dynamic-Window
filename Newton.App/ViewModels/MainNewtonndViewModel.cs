@@ -3,10 +3,11 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentIcons.Common;
+using Microsoft.UI.Dispatching;
 using Newton.Core.Interfaces;
 using Newton.Core.Models;
 using Newton.Core.Services;
-using Microsoft.UI.Dispatching;
+using Newton.Windows.WindowManagement;
 
 namespace Newton.App.ViewModels;
 
@@ -19,6 +20,7 @@ public partial class MainNewtonndViewModel : ObservableObject
     private readonly IAiService _aiService;
     private readonly ISettingsService _settingsService;
     private readonly ITimerService _timerService;
+    private readonly IClipboardService _clipboardService;
 
     private DispatcherQueue? _dispatcherQueue;
 
@@ -54,8 +56,11 @@ public partial class MainNewtonndViewModel : ObservableObject
     public ObservableCollection<AiMessage> AiMessages { get; } = new();
     public ObservableCollection<AiModelOption> AiModels { get; } = new();
     public ObservableCollection<QuickControlItem> QuickControls { get; } = new();
+    public ObservableCollection<ClipboardHistoryItem> ClipboardItems { get; } = new();
 
     public bool IsCompact => VisualState == NewtonndVisualState.Compact;
+    public bool IsHoverPeek => VisualState == NewtonndVisualState.HoverPeek;
+    public bool IsCompactOrHover => VisualState is NewtonndVisualState.Compact or NewtonndVisualState.HoverPeek;
     public bool IsExpanded => VisualState == NewtonndVisualState.Expanded;
     public bool IsDashboard => VisualState == NewtonndVisualState.Dashboard;
 
@@ -75,9 +80,18 @@ public partial class MainNewtonndViewModel : ObservableObject
     public string CompactSubtitle => PrimaryActivity?.Subtitle ?? "Ready";
     public double CompactProgress => PrimaryActivity?.Progress ?? 0;
     public bool HasCompactProgress => Settings.ShowProgressInCompact && PrimaryActivity?.Progress is not null;
-    public string? CompactArtworkPath => PrimaryActivity?.ImageUri ?? CurrentTrack?.ArtworkPath;
+    public string? CompactArtworkPath => PrimaryActivity?.ImageUri ?? CurrentTrack?.ArtworkPath ?? ForegroundAppIconPath;
     public bool HasCompactArtwork => !string.IsNullOrEmpty(CompactArtworkPath);
     public bool HasTrackArtwork => !string.IsNullOrEmpty(CurrentTrack?.ArtworkPath);
+    public string? PlatformIconPath => IsMusicPrimary ? CurrentTrack?.PlatformIconPath : ForegroundAppIconPath;
+    public bool HasPlatformIcon => Settings.ShowPlatformBadge && !string.IsNullOrEmpty(PlatformIconPath);
+    public string PlatformLabel => IsMusicPrimary ? (CurrentTrack?.SourceApp ?? "Media") : (ForegroundAppName ?? "Windows");
+
+    [ObservableProperty]
+    private string? _foregroundAppName;
+
+    [ObservableProperty]
+    private string? _foregroundAppIconPath;
 
     public Symbol CompactSymbol => PrimaryActivity?.Type switch
     {
@@ -99,7 +113,8 @@ public partial class MainNewtonndViewModel : ObservableObject
         ISystemMonitorService systemMonitorService,
         IAiService aiService,
         ISettingsService settingsService,
-        ITimerService timerService)
+        ITimerService timerService,
+        IClipboardService clipboardService)
     {
         _activityService = activityService;
         _musicService = musicService;
@@ -108,6 +123,7 @@ public partial class MainNewtonndViewModel : ObservableObject
         _aiService = aiService;
         _settingsService = settingsService;
         _timerService = timerService;
+        _clipboardService = clipboardService;
 
         _currentTrack = _musicService.CurrentTrack;
         _systemStats = _systemMonitorService.CurrentStats;
@@ -136,7 +152,10 @@ public partial class MainNewtonndViewModel : ObservableObject
         {
             SystemStats = stats;
             OnPropertyChanged(nameof(SystemStats));
+            _ = UpdateForegroundAppAsync();
         });
+        _clipboardService.HistoryChanged += (_, _) => RunOnUi(RefreshClipboard);
+        _ = _clipboardService.RefreshAsync();
         _aiService.MessagesUpdated += (_, _) => RunOnUi(RefreshAiMessages);
         _settingsService.SettingsChanged += (_, s) => RunOnUi(() =>
         {
@@ -156,6 +175,8 @@ public partial class MainNewtonndViewModel : ObservableObject
     partial void OnVisualStateChanged(NewtonndVisualState value)
     {
         OnPropertyChanged(nameof(IsCompact));
+        OnPropertyChanged(nameof(IsHoverPeek));
+        OnPropertyChanged(nameof(IsCompactOrHover));
         OnPropertyChanged(nameof(IsExpanded));
         OnPropertyChanged(nameof(IsDashboard));
     }
@@ -190,8 +211,37 @@ public partial class MainNewtonndViewModel : ObservableObject
         OnPropertyChanged(nameof(CompactArtworkPath));
         OnPropertyChanged(nameof(HasCompactArtwork));
         OnPropertyChanged(nameof(HasTrackArtwork));
+        OnPropertyChanged(nameof(PlatformIconPath));
+        OnPropertyChanged(nameof(HasPlatformIcon));
+        OnPropertyChanged(nameof(PlatformLabel));
         OnPropertyChanged(nameof(CompactSymbol));
     }
+
+    private async Task UpdateForegroundAppAsync()
+    {
+        var app = await ActiveAppIconHelper.GetForegroundAppAsync();
+        if (app is null) return;
+        RunOnUi(() =>
+        {
+            ForegroundAppName = app.DisplayName;
+            ForegroundAppIconPath = app.IconPath;
+            OnPropertyChanged(nameof(CompactArtworkPath));
+            OnPropertyChanged(nameof(HasCompactArtwork));
+            OnPropertyChanged(nameof(PlatformIconPath));
+            OnPropertyChanged(nameof(HasPlatformIcon));
+            OnPropertyChanged(nameof(PlatformLabel));
+        });
+    }
+
+    private void RefreshClipboard()
+    {
+        ClipboardItems.Clear();
+        foreach (var item in _clipboardService.Items) ClipboardItems.Add(item);
+    }
+
+    [RelayCommand] private void CopyClipboardText(string text) => _clipboardService.CopyText(text);
+    [RelayCommand] private void ClearClipboard() => _clipboardService.ClearHistory();
+    [RelayCommand] private Task RefreshClipboardAsync() => _clipboardService.RefreshAsync();
 
     private void InitializeQuickControls()
     {

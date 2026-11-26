@@ -3,6 +3,7 @@ using System.Text;
 using Newton.Core.Interfaces;
 using Newton.Core.Models;
 using Newton.Core.Services;
+using Newton.Windows.WindowManagement;
 using Microsoft.Extensions.Logging;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
@@ -107,10 +108,12 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
             var timeline = session.GetTimelineProperties();
 
             var isPlaying = playback.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+            var rawProc = (session.SourceAppUserModelId ?? "").Split('!').FirstOrDefault()?.Replace(".exe", "", StringComparison.OrdinalIgnoreCase) ?? "";
             var source = FormatAppName(session.SourceAppUserModelId);
             var duration = timeline.EndTime > timeline.StartTime ? timeline.EndTime - timeline.StartTime : TimeSpan.Zero;
             var position = timeline.Position >= timeline.StartTime ? timeline.Position - timeline.StartTime : TimeSpan.Zero;
             var artworkPath = await SaveThumbnailAsync(props.Thumbnail, props.Title, props.Artist);
+            var platformIcon = await ActiveAppIconHelper.GetIconForProcessNameAsync(rawProc);
 
             CurrentTrack = new MusicTrack
             {
@@ -122,6 +125,7 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
                 IsPlaying = isPlaying,
                 SourceApp = source,
                 ArtworkPath = artworkPath,
+                PlatformIconPath = platformIcon,
                 IsSimulated = false
             };
 

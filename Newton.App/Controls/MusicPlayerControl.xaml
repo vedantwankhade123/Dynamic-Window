@@ -61,13 +61,21 @@
                     MaxLines="1" />
             </StackPanel>
 
-            <!-- Live animated colorful waveform bars -->
-            <StackPanel x:Name="MusicWave" Grid.Column="2" Orientation="Horizontal" Spacing="2.5" VerticalAlignment="Center">
-                <Rectangle x:Name="W1" Width="2.5" Height="8" RadiusX="1.2" RadiusY="1.2" Fill="#FB7185" />
-                <Rectangle x:Name="W2" Width="2.5" Height="15" RadiusX="1.2" RadiusY="1.2" Fill="#A78BFA" />
-                <Rectangle x:Name="W3" Width="2.5" Height="11" RadiusX="1.2" RadiusY="1.2" Fill="#818CF8" />
-                <Rectangle x:Name="W4" Width="2.5" Height="17" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" />
-                <Rectangle x:Name="W5" Width="2.5" Height="9" RadiusX="1.2" RadiusY="1.2" Fill="#FB923C" />
+            <!-- Right: Platform Logo + Live animated colorful waveform bars -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Border
+                    Width="20" Height="20" CornerRadius="5"
+                    Visibility="{Binding HasPlatformIcon, Converter={StaticResource BoolToVis}}"
+                    ToolTipService.ToolTip="{Binding PlatformLabel}">
+                    <Image Source="{Binding PlatformIconPath}" Stretch="Uniform" />
+                </Border>
+                <StackPanel x:Name="MusicWave" Orientation="Horizontal" Spacing="2.5" VerticalAlignment="Center">
+                    <Rectangle x:Name="W1" Width="2.5" Height="8" RadiusX="1.2" RadiusY="1.2" Fill="#FB7185" />
+                    <Rectangle x:Name="W2" Width="2.5" Height="15" RadiusX="1.2" RadiusY="1.2" Fill="#A78BFA" />
+                    <Rectangle x:Name="W3" Width="2.5" Height="11" RadiusX="1.2" RadiusY="1.2" Fill="#818CF8" />
+                    <Rectangle x:Name="W4" Width="2.5" Height="17" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" />
+                    <Rectangle x:Name="W5" Width="2.5" Height="9" RadiusX="1.2" RadiusY="1.2" Fill="#FB923C" />
+                </StackPanel>
             </StackPanel>
         </Grid>
 

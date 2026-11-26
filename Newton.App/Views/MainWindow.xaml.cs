@@ -22,6 +22,8 @@ public sealed partial class MainWindow : Window
     private readonly Visual _containerVisual;
     private readonly Compositor _compositor;
     private readonly DispatcherTimer _morphTimer;
+    private readonly DispatcherTimer _hoverExitTimer;
+    private bool _isPointerInside;
 
     private double _curW = 216, _curH = 44, _curR = 22;
     private double _startW = 216, _startH = 44, _startR = 22;
@@ -51,6 +53,16 @@ public sealed partial class MainWindow : Window
 
         _morphTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
         _morphTimer.Tick += OnMorphTick;
+
+        _hoverExitTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(160) };
+        _hoverExitTimer.Tick += (_, _) =>
+        {
+            _hoverExitTimer.Stop();
+            if (!_isPointerInside && _viewModel.VisualState == NewtonndVisualState.HoverPeek)
+            {
+                _viewModel.VisualState = NewtonndVisualState.Compact;
+            }
+        };
 
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
         _settingsService.SettingsChanged += (_, _) => DispatcherQueue.TryEnqueue(() => ApplyWindowBounds(animate: true));
@@ -86,6 +98,7 @@ public sealed partial class MainWindow : Window
         var (w, h, r) = _viewModel.VisualState switch
         {
             NewtonndVisualState.Compact => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0),
+            NewtonndVisualState.HoverPeek => (s.HoverPeekWidth, s.CompactHeight + 4, (s.CompactHeight + 4) / 2.0),
             NewtonndVisualState.Expanded => GetExpandedDimensions(),
             NewtonndVisualState.Dashboard => (780.0, 560.0, 20.0),
             _ => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0)
@@ -203,15 +216,29 @@ public sealed partial class MainWindow : Window
 
     private void OnRootPointerEntered(object sender, PointerRoutedEventArgs e)
     {
+        _isPointerInside = true;
+        _hoverExitTimer.Stop();
         if (_viewModel.VisualState == NewtonndVisualState.Compact)
         {
-            AnimateSpringScale(new Vector3(1.035f, 1.035f, 1f), damping: 0.62f, periodMs: 42);
+            if (_settingsService.Current.HoverToPeek)
+            {
+                _viewModel.VisualState = NewtonndVisualState.HoverPeek;
+            }
+            else
+            {
+                AnimateSpringScale(new Vector3(1.035f, 1.035f, 1f), damping: 0.62f, periodMs: 42);
+            }
         }
     }
 
     private void OnRootPointerExited(object sender, PointerRoutedEventArgs e)
     {
+        _isPointerInside = false;
         AnimateSpringScale(Vector3.One, damping: 0.7f, periodMs: 45);
+        if (_viewModel.VisualState == NewtonndVisualState.HoverPeek)
+        {
+            _hoverExitTimer.Start();
+        }
     }
 
     private void OnRootPointerPressed(object sender, PointerRoutedEventArgs e)
@@ -227,9 +254,9 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
-            if (_viewModel.VisualState == NewtonndVisualState.Compact && _settingsService.Current.ClickToExpand)
+            if (_viewModel.VisualState is NewtonndVisualState.Compact or NewtonndVisualState.HoverPeek && _settingsService.Current.ClickToExpand)
             {
-                _viewModel.ToggleExpandCommand.Execute(null);
+                _viewModel.VisualState = NewtonndVisualState.Expanded;
             }
         }
     }

@@ -2,6 +2,7 @@ using Newton.App.ViewModels;
 using Newton.App.Views;
 using Newton.Core.Interfaces;
 using Newton.Infrastructure.DependencyInjection;
+using Newton.Windows.Clipboard;
 using Newton.Windows.Media;
 using Newton.Windows.SystemMonitoring;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@ public partial class App : Application
         services.AddNewtonCoreServices();
         services.AddSingleton<IMusicService, WindowsMediaService>();
         services.AddSingleton<ISystemMonitorService, WindowsSystemMonitorService>();
+        services.AddSingleton<IClipboardService, WindowsClipboardService>();
         services.AddSingleton<MainNewtonndViewModel>();
         services.AddTransient<SettingsViewModel>();
         Services = services.BuildServiceProvider();

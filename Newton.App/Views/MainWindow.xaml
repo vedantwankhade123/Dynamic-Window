@@ -50,10 +50,10 @@
             RenderTransformOrigin="0.5,0">
 
             <Grid>
-                <!-- Compact State -->
+                <!-- Compact & Horizontal HoverPeek State -->
                 <controls:CompactNewtonndControl
                     x:Name="CompactView"
-                    Visibility="{Binding IsCompact, Converter={StaticResource BoolToVis}}" />
+                    Visibility="{Binding IsCompactOrHover, Converter={StaticResource BoolToVis}}" />
 
                 <!-- Expanded State -->
                 <controls:ExpandedNewtonndControl

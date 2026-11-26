@@ -18,6 +18,7 @@ public enum NewtonPositionMode
 public enum NewtonndVisualState
 {
     Compact,
+    HoverPeek,
     Expanded,
     Dashboard
 }
@@ -34,9 +35,10 @@ public sealed class NewtonSettings
     public NewtonThemeMode ThemeMode { get; set; } = NewtonThemeMode.Dark;
     public string AccentColorHex { get; set; } = "#60A5FA";
     public double NewtonndOpacity { get; set; } = 0.96;
-    public double CornerRadius { get; set; } = 24;
-    public double CompactWidth { get; set; } = 216;
-    public double CompactHeight { get; set; } = 46;
+    public double CornerRadius { get; set; } = 22;
+    public double CompactWidth { get; set; } = 220;
+    public double CompactHeight { get; set; } = 44;
+    public double HoverPeekWidth { get; set; } = 356;
     public double AnimationSpeed { get; set; } = 1.0;
     public bool EnableBlur { get; set; } = true;
 
@@ -49,13 +51,13 @@ public sealed class NewtonSettings
     // Interactions
     public bool ClickToExpand { get; set; } = true;
     public bool DoubleClickForDashboard { get; set; } = true;
-    public bool HoverToPeek { get; set; } = false;
+    public bool HoverToPeek { get; set; } = true;
     public string ToggleShortcut { get; set; } = "Ctrl + Alt + I";
     public int AutoCollapseSeconds { get; set; } = 0;
     public bool ClickOutsideToCollapse { get; set; } = true;
     public bool DragToReposition { get; set; } = false;
 
-    // Activities
+    // Activities & Per-Usecase Customization
     public bool EnableMusic { get; set; } = true;
     public bool EnableDownloads { get; set; } = true;
     public bool EnableTimers { get; set; } = true;
@@ -63,7 +65,16 @@ public sealed class NewtonSettings
     public bool EnableNotifications { get; set; } = true;
     public bool EnableSystemOps { get; set; } = true;
     public bool EnableDevActivities { get; set; } = true;
+    public bool EnableClipboardTracking { get; set; } = true;
     public bool ShowProgressInCompact { get; set; } = true;
+    public bool ShowPlatformBadge { get; set; } = true;
+
+    // Default Handlers (Use Newton as default overlay/tool for these usecases)
+    public bool DefaultForMediaOverlay { get; set; } = true;
+    public bool DefaultForTimers { get; set; } = true;
+    public bool DefaultForClipboardBar { get; set; } = true;
+    public bool DefaultForBatteryAlerts { get; set; } = true;
+    public bool DefaultForAiPrompt { get; set; } = true;
 
     // AI
     public bool EnableAiFeatures { get; set; } = true;

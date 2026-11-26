@@ -70,3 +70,13 @@ public interface ISettingsService
     Task SaveAsync(NewtonSettings settings);
     Task ResetToDefaultsAsync();
 }
+
+public interface IClipboardService
+{
+    IReadOnlyList<ClipboardHistoryItem> Items { get; }
+    event EventHandler? HistoryChanged;
+
+    Task RefreshAsync();
+    void CopyText(string text);
+    void ClearHistory();
+}

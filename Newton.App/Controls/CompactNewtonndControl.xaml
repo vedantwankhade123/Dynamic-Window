@@ -15,12 +15,13 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Compact Pill Badge: Real Artwork or Content-Specific Icon -->
-        <Grid Grid.Column="0" Width="26" Height="26" VerticalAlignment="Center">
+        <!-- Left: Real Album Art / App Icon or Content-Specific Symbol -->
+        <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Center">
             <Border
-                CornerRadius="7"
+                CornerRadius="8"
                 Background="#1A1A20"
                 Visibility="{Binding HasCompactArtwork, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
                 <ic:SymbolIcon
@@ -30,7 +31,7 @@
             </Border>
 
             <Border
-                CornerRadius="7"
+                CornerRadius="8"
                 Visibility="{Binding HasCompactArtwork, Converter={StaticResource BoolToVis}}">
                 <Image Source="{Binding CompactArtworkPath}" Stretch="UniformToFill" />
             </Border>
@@ -53,8 +54,38 @@
                 MaxLines="1" />
         </StackPanel>
 
-        <!-- Right Indicator: Dynamic Island Waveform or Progress Ring -->
-        <Grid Grid.Column="2" VerticalAlignment="Center" Margin="2,0,0,0">
+        <!-- Horizontal Hover-Expand Quick Controls -->
+        <StackPanel
+            Grid.Column="2"
+            Orientation="Horizontal"
+            Spacing="4"
+            VerticalAlignment="Center"
+            Visibility="{Binding IsHoverPeek, Converter={StaticResource BoolToVis}}">
+            <StackPanel Orientation="Horizontal" Spacing="2" Visibility="{Binding IsMusicPrimary, Converter={StaticResource BoolToVis}}">
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
+                    <ic:SymbolIcon Symbol="Previous" FontSize="12" />
+                </Button>
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#2C2C35" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
+                    <ic:SymbolIcon Symbol="Play" FontSize="12" />
+                </Button>
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
+                    <ic:SymbolIcon Symbol="Next" FontSize="12" />
+                </Button>
+            </StackPanel>
+            <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding OpenManageCommand}" ToolTipService.ToolTip="Manage Newton">
+                <ic:SymbolIcon Symbol="Wrench" FontSize="12" />
+            </Button>
+        </StackPanel>
+
+        <!-- Right: Platform Logo + Waveform / Progress Ring -->
+        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center" Margin="2,0,0,0">
+            <Border
+                Width="18" Height="18" CornerRadius="5"
+                Visibility="{Binding HasPlatformIcon, Converter={StaticResource BoolToVis}}"
+                ToolTipService.ToolTip="{Binding PlatformLabel}">
+                <Image Source="{Binding PlatformIconPath}" Stretch="Uniform" />
+            </Border>
+
             <StackPanel
                 x:Name="WaveformBars"
                 Orientation="Horizontal"
@@ -76,6 +107,6 @@
                 Value="{Binding CompactProgress}"
                 Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}, FallbackValue='#60A5FA'}"
                 Visibility="{Binding IsNonMusicPrimary, Converter={StaticResource BoolToVis}}" />
-        </Grid>
+        </StackPanel>
     </Grid>
 </UserControl>
