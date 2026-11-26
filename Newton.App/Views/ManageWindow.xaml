@@ -4,227 +4,215 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ic="using:FluentIcons.WinUI"
     xmlns:conv="using:Newton.App.Converters"
-    Title="Newton — Workspace &amp; Control Center">
+    Title="Newton">
 
-    <Grid Background="#08080A">
+    <Grid Background="#0A0A0D">
         <Grid.Resources>
             <conv:HexToBrushConverter x:Key="HexToBrush" />
         </Grid.Resources>
-        <Grid.ColumnDefinitions>
-            <!-- Far-Left Narrow Icon Rail -->
-            <ColumnDefinition Width="56" />
-            <!-- Secondary Tree / Workspace Sidebar -->
-            <ColumnDefinition Width="236" />
-            <!-- Main Deep-Black Content Canvas -->
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <!-- Custom Seamless Dark Title Bar -->
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <!-- 1. FAR-LEFT ICON RAIL -->
-        <Border Grid.Column="0" Background="#0D0D11" BorderBrush="#14FFFFFF" BorderThickness="0,0,1,0" Padding="0,16">
-            <Grid>
-                <StackPanel Spacing="12" HorizontalAlignment="Center">
-                    <!-- Newton Brand Mark -->
-                    <Border Width="34" Height="34" CornerRadius="10" Background="#16161C" BorderBrush="#26FFFFFF" BorderThickness="1" Margin="0,0,0,10">
-                        <ic:SymbolIcon Symbol="Sparkle" FontSize="17" Foreground="#FFFFFF" />
+        <!-- Custom Title Bar (Drag Region + State Pills) -->
+        <Grid Grid.Row="0" Background="#111114" BorderBrush="#14FFFFFF" BorderThickness="0,0,0,1">
+            <Grid x:Name="CustomTitleBar" Background="Transparent" Padding="14,0">
+                <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+                    <Border Width="20" Height="20" CornerRadius="6" Background="#000000" BorderBrush="#26FFFFFF" BorderThickness="1">
+                        <ic:SymbolIcon Symbol="Sparkle" FontSize="11" Foreground="#FFFFFF" />
                     </Border>
-
-                    <Button Width="38" Height="38" CornerRadius="10" Padding="0" Background="#1E1E26" BorderThickness="0" Foreground="#FFFFFF" Tag="Overview" Click="OnSectionNavClick" ToolTipService.ToolTip="Workspace Overview">
-                        <ic:SymbolIcon Symbol="Home" FontSize="17" />
-                    </Button>
-                    <Button Width="38" Height="38" CornerRadius="10" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Tag="PillStudio" Click="OnSectionNavClick" ToolTipService.ToolTip="Pill Studio &amp; Customization">
-                        <ic:SymbolIcon Symbol="Options" FontSize="17" />
-                    </Button>
-                    <Button Width="38" Height="38" CornerRadius="10" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Tag="Clipboard" Click="OnSectionNavClick" ToolTipService.ToolTip="Clipboard History">
-                        <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="17" />
-                    </Button>
-                    <Button Width="38" Height="38" CornerRadius="10" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Tag="Defaults" Click="OnSectionNavClick" ToolTipService.ToolTip="Default Handlers">
-                        <ic:SymbolIcon Symbol="CheckmarkCircle" FontSize="17" />
-                    </Button>
+                    <TextBlock Text="Newton" FontSize="13" FontWeight="SemiBold" Foreground="#F5F5F7" VerticalAlignment="Center" />
                 </StackPanel>
-
-                <Button VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="38" Height="38" CornerRadius="10" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding OpenSettingsCommand}" ToolTipService.ToolTip="All Settings">
-                    <ic:SymbolIcon Symbol="Settings" FontSize="17" />
-                </Button>
             </Grid>
-        </Border>
 
-        <!-- 2. SECONDARY WORKSPACE SIDEBAR -->
-        <Border Grid.Column="1" Background="#0F0F13" BorderBrush="#14FFFFFF" BorderThickness="0,0,1,0" Padding="14,16">
-            <StackPanel Spacing="14">
+            <!-- Pill Preview State Switcher (Centered, Interactive) -->
+            <Border
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="#1A1A1F"
+                BorderBrush="#16FFFFFF"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="2">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Button Content="Compact" Padding="10,3" FontSize="11" CornerRadius="6" Background="Transparent" BorderThickness="0" Foreground="#E5E5EA" Command="{Binding CollapseCommand}" />
+                    <Button Content="Expanded" Padding="10,3" FontSize="11" CornerRadius="6" Background="Transparent" BorderThickness="0" Foreground="#E5E5EA" Command="{Binding ToggleExpandCommand}" />
+                    <Button Content="Dashboard" Padding="10,3" FontSize="11" CornerRadius="6" Background="Transparent" BorderThickness="0" Foreground="#E5E5EA" Command="{Binding OpenDashboardCommand}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- macOS System Settings 2-Column Workspace -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="228" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Sidebar (#111114) -->
+            <Border Grid.Column="0" Background="#111114" BorderBrush="#14FFFFFF" BorderThickness="0,0,1,0" Padding="12,14">
                 <Grid>
-                    <TextBlock Text="Newton Workspace" FontSize="14" FontWeight="SemiBold" Foreground="#F8FAFC" VerticalAlignment="Center" />
-                    <Button HorizontalAlignment="Right" Width="26" Height="26" CornerRadius="7" Padding="0" Background="#191920" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding StartTimer5MinCommand}" ToolTipService.ToolTip="Quick 5m Timer">
-                        <ic:SymbolIcon Symbol="Add" FontSize="13" />
+                    <StackPanel Spacing="12">
+                        <TextBox
+                            PlaceholderText="Search"
+                            FontSize="12.5"
+                            CornerRadius="8"
+                            Background="#1C1C21"
+                            BorderBrush="#18FFFFFF"
+                            Padding="10,6" />
+
+                        <StackPanel Spacing="3">
+                            <Button x:Name="NavOverview" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" CornerRadius="8" Padding="10,7" Background="#25252C" BorderThickness="0" Tag="Overview" Click="OnSectionNavClick">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Border Width="22" Height="22" CornerRadius="6" Background="#0A84FF">
+                                        <ic:SymbolIcon Symbol="Home" FontSize="12" Foreground="#FFFFFF" />
+                                    </Border>
+                                    <TextBlock Text="Overview" FontSize="13" FontWeight="Medium" Foreground="#F5F5F7" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="NavPillStudio" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Tag="PillStudio" Click="OnSectionNavClick">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Border Width="22" Height="22" CornerRadius="6" Background="#BF5AF2">
+                                        <ic:SymbolIcon Symbol="Options" FontSize="12" Foreground="#FFFFFF" />
+                                    </Border>
+                                    <TextBlock Text="Pill Behavior" FontSize="13" FontWeight="Medium" Foreground="#E5E5EA" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="NavClipboard" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Tag="Clipboard" Click="OnSectionNavClick">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Border Width="22" Height="22" CornerRadius="6" Background="#FF9F0A">
+                                        <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="12" Foreground="#FFFFFF" />
+                                    </Border>
+                                    <TextBlock Text="Clipboard" FontSize="13" FontWeight="Medium" Foreground="#E5E5EA" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="NavDefaults" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Tag="Defaults" Click="OnSectionNavClick">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Border Width="22" Height="22" CornerRadius="6" Background="#30D158">
+                                        <ic:SymbolIcon Symbol="CheckmarkCircle" FontSize="12" Foreground="#FFFFFF" />
+                                    </Border>
+                                    <TextBlock Text="Default Apps" FontSize="13" FontWeight="Medium" Foreground="#E5E5EA" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button VerticalAlignment="Bottom" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Command="{Binding OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Border Width="22" Height="22" CornerRadius="6" Background="#636366">
+                                <ic:SymbolIcon Symbol="Settings" FontSize="12" Foreground="#FFFFFF" />
+                            </Border>
+                            <TextBlock Text="Advanced Settings" FontSize="13" FontWeight="Medium" Foreground="#E5E5EA" VerticalAlignment="Center" />
+                        </StackPanel>
                     </Button>
                 </Grid>
+            </Border>
 
-                <!-- Search Input -->
-                <TextBox PlaceholderText="Search tools &amp; pills..." FontSize="12" CornerRadius="9" Background="#16161C" BorderBrush="#1EFFFFFF" />
+            <!-- Right Content Canvas (#0A0A0D) -->
+            <ScrollViewer Grid.Column="1" Padding="28,22" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="22" MaxWidth="680" HorizontalAlignment="Stretch">
 
-                <!-- Segmented Switcher -->
-                <Border Background="#15151B" CornerRadius="9" Padding="3" BorderBrush="#14FFFFFF" BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="All Tools" HorizontalAlignment="Stretch" CornerRadius="7" Padding="0,5" FontSize="11.5" Background="#23232C" BorderThickness="0" Foreground="#FFFFFF" Tag="Overview" Click="OnSectionNavClick" />
-                        <Button Grid.Column="1" Content="Defaults" HorizontalAlignment="Stretch" CornerRadius="7" Padding="0,5" FontSize="11.5" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Tag="Defaults" Click="OnSectionNavClick" />
-                    </Grid>
-                </Border>
+                    <!-- Page Header -->
+                    <TextBlock x:Name="HeaderTitle" Text="Overview" FontSize="20" FontWeight="SemiBold" Foreground="#F5F5F7" />
 
-                <!-- Tree Navigation Items -->
-                <StackPanel Spacing="4">
-                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" CornerRadius="8" Padding="10,7" Background="#1D1D25" BorderThickness="0" Tag="Overview" Click="OnSectionNavClick">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <ic:SymbolIcon Symbol="Folder" FontSize="14" Foreground="#E2E8F0" />
-                                <TextBlock Text="Overview &amp; Pills" FontSize="12.5" Foreground="#FFFFFF" />
-                            </StackPanel>
-                            <Border Background="#2A2A35" CornerRadius="5" Padding="6,1" HorizontalAlignment="Right">
-                                <TextBlock Text="{Binding Activities.Count}" FontSize="10.5" Foreground="#CBD5E1" />
-                            </Border>
-                        </Grid>
-                    </Button>
-
-                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Tag="PillStudio" Click="OnSectionNavClick">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <ic:SymbolIcon Symbol="Options" FontSize="14" Foreground="#9CA3AF" />
-                                <TextBlock Text="Pill Customization" FontSize="12.5" Foreground="#CBD5E1" />
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-
-                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Tag="Clipboard" Click="OnSectionNavClick">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="14" Foreground="#9CA3AF" />
-                                <TextBlock Text="Clipboard History" FontSize="12.5" Foreground="#CBD5E1" />
-                            </StackPanel>
-                            <Border Background="#1D1D25" CornerRadius="5" Padding="6,1" HorizontalAlignment="Right">
-                                <TextBlock Text="{Binding ClipboardItems.Count}" FontSize="10.5" Foreground="#94A3B8" />
-                            </Border>
-                        </Grid>
-                    </Button>
-
-                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" CornerRadius="8" Padding="10,7" Background="Transparent" BorderThickness="0" Tag="Defaults" Click="OnSectionNavClick">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <ic:SymbolIcon Symbol="CheckmarkCircle" FontSize="14" Foreground="#9CA3AF" />
-                                <TextBlock Text="Default Handlers" FontSize="12.5" Foreground="#CBD5E1" />
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <!-- 3. MAIN CONTENT CANVAS -->
-        <Grid Grid.Column="2" Background="#08080A" Padding="24,18" RowSpacing="18">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!-- Top Breadcrumb + Pill State Switcher -->
-            <Grid Grid.Row="0">
-                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <TextBlock x:Name="HeaderTitle" Text="Overview &amp; Pills" FontSize="15" FontWeight="SemiBold" Foreground="#F8FAFC" />
-                    <Border Background="#18181F" CornerRadius="6" Padding="7,2">
-                        <TextBlock Text="Always On Top" FontSize="10.5" Foreground="#60A5FA" />
-                    </Border>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                    <Button Content="Compact" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding CollapseCommand}" />
-                    <Button Content="Expanded" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding ToggleExpandCommand}" />
-                    <Button Content="Dashboard" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding OpenDashboardCommand}" />
-                </StackPanel>
-            </Grid>
-
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="22">
-
-                    <!-- SECTION: OVERVIEW & PILLS (Folder-style dark cards + Live Activities + Timers + Telemetry) -->
-                    <StackPanel x:Name="OverviewSection" Spacing="20">
-                        <TextBlock Text="Pill Modules" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" />
-
-                        <!-- Folder-Style Module Cards (Inspired by Reference) -->
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Card 1: Focus Timers -->
-                            <Border Grid.Column="0" Background="#141418" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="14" Padding="14">
-                                <StackPanel Spacing="10">
-                                    <Grid>
-                                        <Border Width="38" Height="38" CornerRadius="10" Background="#24F59E0B">
-                                            <ic:SymbolIcon Symbol="Timer" FontSize="19" Foreground="#F59E0B" />
-                                        </Border>
-                                        <Button HorizontalAlignment="Right" Content="5m" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Command="{Binding StartTimer5MinCommand}" />
-                                    </Grid>
-                                    <StackPanel Spacing="1">
-                                        <TextBlock Text="Focus Timers" FontSize="13.5" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                                        <TextBlock Text="Pomodoro &amp; countdowns" FontSize="11" Foreground="#94A3B8" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Button Content="15m" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Command="{Binding StartTimer15MinCommand}" />
-                                        <Button Content="25m" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Command="{Binding StartPomodoro25MinCommand}" />
-                                        <Button Content="Stop" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Command="{Binding StopTimerCommand}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Card 2: System Telemetry -->
-                            <Border Grid.Column="1" Background="#141418" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="14" Padding="14">
-                                <StackPanel Spacing="10">
-                                    <Border Width="38" Height="38" CornerRadius="10" Background="#1F34D399" HorizontalAlignment="Left">
-                                        <ic:SymbolIcon Symbol="DeveloperBoard" FontSize="19" Foreground="#34D399" />
-                                    </Border>
-                                    <StackPanel Spacing="1">
-                                        <TextBlock Text="System Health" FontSize="13.5" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="CPU" FontSize="11" Foreground="#94A3B8" />
-                                            <TextBlock Text="{Binding SystemStats.CpuUsagePercent}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                                            <TextBlock Text="%  •  RAM" FontSize="11" Foreground="#94A3B8" />
-                                            <TextBlock Text="{Binding SystemStats.RamUsedGb}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                                            <TextBlock Text="GB" FontSize="11" Foreground="#94A3B8" />
+                    <!-- 1. OVERVIEW SECTION -->
+                    <StackPanel x:Name="OverviewSection" Spacing="18">
+                        <!-- Grouped Card: Quick Timers & Windows Tools -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="QUICK ACTIONS" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93" Margin="4,0,0,0" />
+                            <Border Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="12">
+                                <StackPanel>
+                                    <!-- Row 1: Focus Timer -->
+                                    <Grid Padding="14,11">
+                                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="7" Background="#24FF9F0A">
+                                                <ic:SymbolIcon Symbol="Timer" FontSize="14" Foreground="#FF9F0A" />
+                                            </Border>
+                                            <StackPanel Spacing="0">
+                                                <TextBlock Text="Focus Timer" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                                <TextBlock Text="Start a live countdown in the pill" FontSize="11.5" Foreground="#8E8E93" />
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.CpuUsagePercent}" Height="4" CornerRadius="2" Foreground="#34D399" Background="#22FFFFFF" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Button Content="5m" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Command="{Binding StartTimer5MinCommand}" />
+                                            <Button Content="15m" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Command="{Binding StartTimer15MinCommand}" />
+                                            <Button Content="25m" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#FF9F0A" Command="{Binding StartPomodoro25MinCommand}" />
+                                            <Button Content="Stop" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#1C1C22" BorderThickness="0" Foreground="#8E8E93" Command="{Binding StopTimerCommand}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <Rectangle Height="1" Fill="#10FFFFFF" Margin="54,0,0,0" />
+
+                                    <!-- Row 2: Windows Shortcuts -->
+                                    <Grid Padding="14,11">
+                                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="7" Background="#240A84FF">
+                                                <ic:SymbolIcon Symbol="Apps" FontSize="14" Foreground="#0A84FF" />
+                                            </Border>
+                                            <StackPanel Spacing="0">
+                                                <TextBlock Text="Windows Utilities" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                                <TextBlock Text="Launch native system tools" FontSize="11.5" Foreground="#8E8E93" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Button Content="Screenshot" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Tag="snip" Click="OnQuickToolTagClick" />
+                                            <Button Content="Sound" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Tag="sound" Click="OnQuickToolTagClick" />
+                                            <Button Content="Focus Assist" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Tag="focus" Click="OnQuickToolTagClick" />
+                                        </StackPanel>
+                                    </Grid>
                                 </StackPanel>
                             </Border>
+                        </StackPanel>
 
-                            <!-- Card 3: Quick Windows Tools -->
-                            <Border Grid.Column="2" Background="#141418" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="14" Padding="14">
-                                <StackPanel Spacing="10">
-                                    <Border Width="38" Height="38" CornerRadius="10" Background="#1F60A5FA" HorizontalAlignment="Left">
-                                        <ic:SymbolIcon Symbol="Apps" FontSize="19" Foreground="#60A5FA" />
-                                    </Border>
-                                    <StackPanel Spacing="1">
-                                        <TextBlock Text="Windows Tools" FontSize="13.5" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                                        <TextBlock Text="Snipping, Sound, Bluetooth" FontSize="11" Foreground="#94A3B8" />
+                        <!-- Grouped Card: Live System Telemetry -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="SYSTEM TELEMETRY" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93" Margin="4,0,0,0" />
+                            <Border Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="12" Padding="16,14">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Spacing="4">
+                                        <TextBlock Text="CPU" FontSize="11.5" Foreground="#8E8E93" />
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <TextBlock Text="{Binding SystemStats.CpuUsagePercent}" FontSize="18" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                            <TextBlock Text="%" FontSize="12" Foreground="#8E8E93" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        </StackPanel>
+                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.CpuUsagePercent}" Height="3.5" CornerRadius="2" Foreground="#0A84FF" Background="#22FFFFFF" />
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Button Content="Snip" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Tag="snip" Click="OnQuickToolTagClick" />
-                                        <Button Content="Sound" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Tag="sound" Click="OnQuickToolTagClick" />
-                                        <Button Content="Focus" Style="{StaticResource NewtonPillButtonStyle}" Padding="8,3" Tag="focus" Click="OnQuickToolTagClick" />
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="Memory" FontSize="11.5" Foreground="#8E8E93" />
+                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                            <TextBlock Text="{Binding SystemStats.RamUsedGb}" FontSize="18" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                            <TextBlock Text="GB" FontSize="12" Foreground="#8E8E93" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        </StackPanel>
+                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.RamUsagePercent}" Height="3.5" CornerRadius="2" Foreground="#BF5AF2" Background="#22FFFFFF" />
                                     </StackPanel>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="4">
+                                        <TextBlock Text="Battery" FontSize="11.5" Foreground="#8E8E93" />
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <TextBlock Text="{Binding SystemStats.BatteryPercent}" FontSize="18" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                            <TextBlock Text="%" FontSize="12" Foreground="#8E8E93" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        </StackPanel>
+                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.BatteryPercent}" Height="3.5" CornerRadius="2" Foreground="#30D158" Background="#22FFFFFF" />
+                                    </StackPanel>
+                                </Grid>
                             </Border>
-                        </Grid>
+                        </StackPanel>
 
-                        <!-- Active Live Activities Table -->
-                        <StackPanel Spacing="10">
-                            <TextBlock Text="Active Live Activities" FontSize="15" FontWeight="SemiBold" Foreground="#F8FAFC" />
+                        <!-- Grouped Card: Active Live Activities -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="ACTIVE PILL ACTIVITIES" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93" Margin="4,0,0,0" />
                             <ItemsControl ItemsSource="{Binding Activities}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Background="#121216" BorderBrush="#18FFFFFF" BorderThickness="1" CornerRadius="10" Padding="12,9" Margin="0,0,0,6" Tag="{Binding Id}" Click="OnActivityFocusClick">
+                                        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="11" Padding="14,10" Margin="0,0,0,6" Tag="{Binding Id}" Click="OnActivityFocusClick">
                                             <Grid ColumnSpacing="10">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -232,11 +220,11 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <ic:SymbolIcon Grid.Column="0" Symbol="Pulse" FontSize="15" Foreground="{Binding AccentHex, Converter={StaticResource HexToBrush}}" />
-                                                <StackPanel Grid.Column="1" Spacing="1">
-                                                    <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                                                    <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="#94A3B8" />
+                                                <StackPanel Grid.Column="1" Spacing="0">
+                                                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="Medium" Foreground="#F5F5F7" />
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="11.5" Foreground="#8E8E93" />
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="11" Foreground="#60A5FA" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="11.5" Foreground="#0A84FF" VerticalAlignment="Center" />
                                             </Grid>
                                         </Button>
                                     </DataTemplate>
@@ -245,40 +233,79 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- SECTION: PILL CUSTOMIZATION -->
-                    <StackPanel x:Name="PillStudioSection" Spacing="14" Visibility="Collapsed">
-                        <TextBlock Text="Pill UI &amp; Behavior Customization" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" />
-                        <Border Background="#121216" BorderBrush="#1AFFFFFF" BorderThickness="1" CornerRadius="14" Padding="18">
-                            <StackPanel Spacing="12">
-                                <ToggleSwitch Header="Enable Newton Pill (Always On Top)" IsOn="{Binding Settings.IsNewtonndEnabled, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Auto-Dodge Browser Tabs (Slide to Titlebar &amp; Hold Alt for Click-Through)" IsOn="{Binding Settings.AutoDodgeBrowserTabs, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Expand Horizontally on Hover (Quick Controls)" IsOn="{Binding Settings.HoverToPeek, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Show Platform Logo on Right (Spotify, Chrome, etc.)" IsOn="{Binding Settings.ShowPlatformBadge, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Click Outside to Collapse" IsOn="{Binding Settings.ClickOutsideToCollapse, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Drag to Reposition" IsOn="{Binding Settings.DragToReposition, Mode=TwoWay}" />
+                    <!-- 2. PILL BEHAVIOR & APPEARANCE (Apple Grouped Inset Rows) -->
+                    <StackPanel x:Name="PillStudioSection" Spacing="16" Visibility="Collapsed">
+                        <Border Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="12">
+                            <StackPanel>
+                                <Grid Padding="14,10">
+                                    <StackPanel VerticalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="Enable Newton Pill" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                        <TextBlock Text="Keep the floating pill always on top" FontSize="11.5" Foreground="#8E8E93" />
+                                    </StackPanel>
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.IsNewtonndEnabled, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+
+                                <Grid Padding="14,10">
+                                    <StackPanel VerticalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="Auto-Dodge Browser Tabs" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                        <TextBlock Text="Slide to titlebar on browsers; hold Alt for click-through" FontSize="11.5" Foreground="#8E8E93" />
+                                    </StackPanel>
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.AutoDodgeBrowserTabs, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+
+                                <Grid Padding="14,10">
+                                    <StackPanel VerticalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="Horizontal Hover Expand" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                        <TextBlock Text="Extend horizontally on hover to show quick controls" FontSize="11.5" Foreground="#8E8E93" />
+                                    </StackPanel>
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.HoverToPeek, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+
+                                <Grid Padding="14,10">
+                                    <StackPanel VerticalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="Show Platform Logo" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                        <TextBlock Text="Display source app icon on the right side of media pills" FontSize="11.5" Foreground="#8E8E93" />
+                                    </StackPanel>
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.ShowPlatformBadge, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+
+                                <Grid Padding="14,10">
+                                    <StackPanel VerticalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="Click Outside to Collapse" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" />
+                                        <TextBlock Text="Return to compact pill when switching windows" FontSize="11.5" Foreground="#8E8E93" />
+                                    </StackPanel>
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.ClickOutsideToCollapse, Mode=TwoWay}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="12" Padding="14,12">
+                            <StackPanel Spacing="10">
                                 <Slider Header="Compact Width (px)" Minimum="180" Maximum="300" StepFrequency="4" Value="{Binding Settings.CompactWidth, Mode=TwoWay}" />
                                 <Slider Header="Hover-Expanded Width (px)" Minimum="280" Maximum="460" StepFrequency="8" Value="{Binding Settings.HoverPeekWidth, Mode=TwoWay}" />
                                 <Slider Header="Compact Height (px)" Minimum="36" Maximum="56" StepFrequency="2" Value="{Binding Settings.CompactHeight, Mode=TwoWay}" />
                                 <Slider Header="Pill Opacity" Minimum="0.5" Maximum="1.0" StepFrequency="0.02" Value="{Binding Settings.NewtonndOpacity, Mode=TwoWay}" />
-                                <Button HorizontalAlignment="Right" Background="{StaticResource NewtonAccentBrush}" Foreground="#070709" CornerRadius="12" Padding="14,7" FontWeight="SemiBold" Content="Save Pill Settings" Command="{Binding SaveQuickSettingsCommand}" />
                             </StackPanel>
                         </Border>
+
+                        <Button HorizontalAlignment="Right" Background="#0A84FF" Foreground="#FFFFFF" CornerRadius="8" Padding="16,7" FontWeight="Medium" Content="Save Changes" Command="{Binding SaveQuickSettingsCommand}" />
                     </StackPanel>
 
-                    <!-- SECTION: CLIPBOARD HISTORY -->
+                    <!-- 3. CLIPBOARD HISTORY -->
                     <StackPanel x:Name="ClipboardSection" Spacing="12" Visibility="Collapsed">
-                        <Grid>
-                            <TextBlock Text="Windows Clipboard History" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" VerticalAlignment="Center" />
-                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                                <Button Content="Refresh" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding RefreshClipboardCommand}" />
-                                <Button Content="Clear" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding ClearClipboardCommand}" />
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <Button Content="Refresh" Padding="12,5" FontSize="12" CornerRadius="8" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Command="{Binding RefreshClipboardCommand}" />
+                            <Button Content="Clear" Padding="12,5" FontSize="12" CornerRadius="8" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Command="{Binding ClearClipboardCommand}" />
+                        </StackPanel>
 
                         <ItemsControl ItemsSource="{Binding ClipboardItems}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="#121216" BorderBrush="#18FFFFFF" BorderThickness="1" CornerRadius="10" Padding="12,9" Margin="0,0,0,6">
+                                    <Border Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,6">
                                         <Grid ColumnSpacing="10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
@@ -286,10 +313,10 @@
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <ic:SymbolIcon Grid.Column="0" Symbol="DocumentText" FontSize="15" Foreground="#60A5FA" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Preview}" FontSize="12.5" Foreground="#E2E8F0" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="2" Text="{Binding TimeLabel}" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" />
-                                            <Button Grid.Column="3" Content="Copy" Style="{StaticResource NewtonPillButtonStyle}" Padding="10,4" Tag="{Binding Text}" Click="OnCopyClipboardClick" />
+                                            <ic:SymbolIcon Grid.Column="0" Symbol="DocumentText" FontSize="15" Foreground="#FF9F0A" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Preview}" FontSize="12.5" Foreground="#F5F5F7" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding TimeLabel}" FontSize="11" Foreground="#8E8E93" VerticalAlignment="Center" />
+                                            <Button Grid.Column="3" Content="Copy" Padding="10,4" FontSize="11.5" CornerRadius="7" Background="#24242B" BorderThickness="0" Foreground="#F5F5F7" Tag="{Binding Text}" Click="OnCopyClipboardClick" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -297,20 +324,37 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <!-- SECTION: DEFAULT HANDLERS -->
-                    <StackPanel x:Name="DefaultsSection" Spacing="14" Visibility="Collapsed">
-                        <TextBlock Text="Set Newton as Default Companion" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" />
-                        <TextBlock Text="Choose which desktop overlays and quick tools Newton handles by default." FontSize="12" Foreground="#94A3B8" />
-                        <Border Background="#121216" BorderBrush="#1AFFFFFF" BorderThickness="1" CornerRadius="14" Padding="18">
-                            <StackPanel Spacing="12">
-                                <ToggleSwitch Header="Default Media Overlay (Spotify, Chrome, Edge, VLC)" IsOn="{Binding Settings.DefaultForMediaOverlay, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Default Focus &amp; Pomodoro Timer Pill" IsOn="{Binding Settings.DefaultForTimers, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Default Clipboard History Quick Bar" IsOn="{Binding Settings.DefaultForClipboardBar, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Default Low Battery Alert Pill" IsOn="{Binding Settings.DefaultForBatteryAlerts, Mode=TwoWay}" />
-                                <ToggleSwitch Header="Default Local AI Quick Prompt (Ollama)" IsOn="{Binding Settings.DefaultForAiPrompt, Mode=TwoWay}" />
-                                <Button HorizontalAlignment="Right" Background="{StaticResource NewtonAccentBrush}" Foreground="#070709" CornerRadius="12" Padding="14,7" FontWeight="SemiBold" Content="Save Default Preferences" Command="{Binding SaveQuickSettingsCommand}" />
+                    <!-- 4. DEFAULT APPS / HANDLERS -->
+                    <StackPanel x:Name="DefaultsSection" Spacing="16" Visibility="Collapsed">
+                        <Border Background="#16161B" BorderBrush="#14FFFFFF" BorderThickness="1" CornerRadius="12">
+                            <StackPanel>
+                                <Grid Padding="14,10">
+                                    <TextBlock Text="Default Media Overlay (Spotify, Chrome, Edge, VLC)" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" VerticalAlignment="Center" />
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.DefaultForMediaOverlay, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+                                <Grid Padding="14,10">
+                                    <TextBlock Text="Default Focus &amp; Pomodoro Timer Pill" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" VerticalAlignment="Center" />
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.DefaultForTimers, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+                                <Grid Padding="14,10">
+                                    <TextBlock Text="Default Clipboard Quick Bar" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" VerticalAlignment="Center" />
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.DefaultForClipboardBar, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+                                <Grid Padding="14,10">
+                                    <TextBlock Text="Default Low Battery Alert Pill" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" VerticalAlignment="Center" />
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.DefaultForBatteryAlerts, Mode=TwoWay}" />
+                                </Grid>
+                                <Rectangle Height="1" Fill="#10FFFFFF" Margin="14,0,0,0" />
+                                <Grid Padding="14,10">
+                                    <TextBlock Text="Default Local AI Quick Prompt (Ollama)" FontSize="13.5" FontWeight="Medium" Foreground="#F5F5F7" VerticalAlignment="Center" />
+                                    <ToggleSwitch HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" MinWidth="0" IsOn="{Binding Settings.DefaultForAiPrompt, Mode=TwoWay}" />
+                                </Grid>
                             </StackPanel>
                         </Border>
+                        <Button HorizontalAlignment="Right" Background="#0A84FF" Foreground="#FFFFFF" CornerRadius="8" Padding="16,7" FontWeight="Medium" Content="Save Defaults" Command="{Binding SaveQuickSettingsCommand}" />
                     </StackPanel>
 
                 </StackPanel>

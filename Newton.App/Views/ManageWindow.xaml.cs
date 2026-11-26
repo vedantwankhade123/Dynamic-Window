@@ -3,8 +3,10 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Newton.App.ViewModels;
 using Windows.Graphics;
+using Windows.UI;
 using WinRT.Interop;
 
 namespace Newton.App.Views;
@@ -19,9 +21,25 @@ public sealed partial class ManageWindow : Window
             fe.DataContext = App.Services.GetRequiredService<MainNewtonndViewModel>();
         }
 
+        ConfigureDarkTitleBar();
+    }
+
+    private void ConfigureDarkTitleBar()
+    {
         var hwnd = WindowNative.GetWindowHandle(this);
         var appWindow = AppWindow.GetFromWindowId(Win32Interop.GetWindowIdFromWindow(hwnd));
-        appWindow.Resize(new SizeInt32(1020, 680));
+        appWindow.Resize(new SizeInt32(960, 640));
+
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(CustomTitleBar);
+
+        var tb = appWindow.TitleBar;
+        tb.ButtonBackgroundColor = Colors.Transparent;
+        tb.ButtonInactiveBackgroundColor = Colors.Transparent;
+        tb.ButtonForegroundColor = Color.FromArgb(255, 229, 229, 234);
+        tb.ButtonInactiveForegroundColor = Color.FromArgb(255, 142, 142, 147);
+        tb.ButtonHoverBackgroundColor = Color.FromArgb(30, 255, 255, 255);
+        tb.ButtonHoverForegroundColor = Colors.White;
     }
 
     private void OnSectionNavClick(object sender, RoutedEventArgs e)
@@ -33,12 +51,19 @@ public sealed partial class ManageWindow : Window
         ClipboardSection.Visibility = tag == "Clipboard" ? Visibility.Visible : Visibility.Collapsed;
         DefaultsSection.Visibility = tag == "Defaults" ? Visibility.Visible : Visibility.Collapsed;
 
+        var activeBg = new SolidColorBrush(Color.FromArgb(255, 37, 37, 44));
+        var clearBg = new SolidColorBrush(Colors.Transparent);
+        NavOverview.Background = tag == "Overview" ? activeBg : clearBg;
+        NavPillStudio.Background = tag == "PillStudio" ? activeBg : clearBg;
+        NavClipboard.Background = tag == "Clipboard" ? activeBg : clearBg;
+        NavDefaults.Background = tag == "Defaults" ? activeBg : clearBg;
+
         HeaderTitle.Text = tag switch
         {
-            "PillStudio" => "Pill Customization",
-            "Clipboard" => "Clipboard History",
-            "Defaults" => "Default Handlers",
-            _ => "Overview & Pills"
+            "PillStudio" => "Pill Behavior",
+            "Clipboard" => "Clipboard",
+            "Defaults" => "Default Apps",
+            _ => "Overview"
         };
     }
 
