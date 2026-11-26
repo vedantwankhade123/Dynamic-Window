@@ -75,8 +75,14 @@ public interface IClipboardService
 {
     IReadOnlyList<ClipboardHistoryItem> Items { get; }
     event EventHandler? HistoryChanged;
+    event EventHandler<ClipboardHistoryItem>? ItemCaptured;
 
     Task RefreshAsync();
     void CopyText(string text);
+    Task CopyItemAsync(ClipboardHistoryItem item);
+    void AddDroppedText(string text);
+    void AddDroppedFiles(IReadOnlyList<string> filePaths);
+    void TogglePin(string id);
+    void RemoveItem(string id);
     void ClearHistory();
 }

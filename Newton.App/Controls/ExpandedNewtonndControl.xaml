@@ -215,6 +215,81 @@
                 Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}}" />
         </Grid>
 
+        <!-- 10. TACK CLIPBOARD & DROP SHELF -->
+        <Grid Padding="16,14" RowSpacing="10" Visibility="{Binding IsClipboardPrimary, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Border Width="22" Height="22" CornerRadius="6" Background="#2430D158">
+                        <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="12" Foreground="#30D158" />
+                    </Border>
+                    <TextBlock Text="Tack Shelf" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" />
+                    <TextBlock Text="Drag items out or click Copy" FontSize="11" Foreground="#8E8E93" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                    <Button Content="Clear" Padding="8,3" FontSize="11" CornerRadius="8" Background="#1C1C22" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding ClearClipboardCommand}" />
+                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding CollapseCommand}" ToolTipService.ToolTip="Collapse">
+                        <ic:SymbolIcon Symbol="ChevronUp" FontSize="11" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" MaxHeight="162" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding ClipboardItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                Background="#15151A"
+                                BorderBrush="#18FFFFFF"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="10,7"
+                                Margin="0,0,0,6"
+                                CanDrag="True"
+                                DragStarting="OnShelfItemDragStarting">
+                                <Grid ColumnSpacing="9">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Thumbnail for Screenshot/Image or Icon for Text/File -->
+                                    <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Center">
+                                        <Border CornerRadius="6" Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}">
+                                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill" />
+                                        </Border>
+                                        <Border CornerRadius="6" Background="#22FFFFFF" Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                                            <ic:SymbolIcon Symbol="DocumentText" FontSize="13" Foreground="#60A5FA" />
+                                        </Border>
+                                    </Grid>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="{Binding Preview}" FontSize="12" Foreground="#F5F5F7" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                                        <TextBlock Text="{Binding TimeLabel}" FontSize="10" Foreground="#8E8E93" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                        <Button Padding="8,3" FontSize="10.5" CornerRadius="7" Background="#26FFFFFF" BorderThickness="0" Foreground="#FFFFFF" Content="Copy" Tag="{Binding}" Click="OnShelfCopyClick" />
+                                        <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Tag="{Binding Id}" Click="OnShelfPinClick" ToolTipService.ToolTip="Pin">
+                                            <ic:SymbolIcon Symbol="Pin" FontSize="11" />
+                                        </Button>
+                                        <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#8E8E93" Tag="{Binding Id}" Click="OnShelfRemoveClick" ToolTipService.ToolTip="Remove">
+                                            <ic:SymbolIcon Symbol="Dismiss" FontSize="10" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
         <!-- 9. AI TASK / NOTIFICATION / SYSTEM OP PILL -->
         <Grid Padding="14,8" Visibility="{Binding IsAiOrOtherPrimary, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>

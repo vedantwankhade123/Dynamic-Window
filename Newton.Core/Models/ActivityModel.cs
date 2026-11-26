@@ -16,7 +16,8 @@ public enum ActivityType
     FocusAssist,
     LowBattery,
     BluetoothAccessory,
-    IncomingCall
+    IncomingCall,
+    Clipboard
 }
 
 public enum ActivityStatus

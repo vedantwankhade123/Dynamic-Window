@@ -82,6 +82,9 @@
                 <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
                     <ic:SymbolIcon Symbol="Next" FontSize="12" />
                 </Button>
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#30D158" Command="{Binding OpenTackShelfCommand}" ToolTipService.ToolTip="Tack Shelf">
+                    <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="12" />
+                </Button>
             </StackPanel>
 
             <!-- Right: Platform Logo / Progress Ring (No Waveform) -->

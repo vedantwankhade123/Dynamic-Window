@@ -229,6 +229,7 @@ public sealed partial class MainWindow : Window
             ActivityType.FocusAssist => (310, 60, 30),
             ActivityType.BluetoothAccessory => (296, 60, 30),
             ActivityType.IncomingCall => (342, 64, 32),
+            ActivityType.Clipboard => (392, 232, 22),
             ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper => (340, 64, 32),
             _ => (356, 72, 22)
         };
@@ -342,5 +343,45 @@ public sealed partial class MainWindow : Window
     private void OnExitClick(object sender, RoutedEventArgs e)
     {
         Application.Current.Exit();
+    }
+
+    private void OnRootDragOver(object sender, DragEventArgs e)
+    {
+        if (e.DataView.Contains(global::Windows.ApplicationModel.DataTransfer.StandardDataFormats.StorageItems) ||
+            e.DataView.Contains(global::Windows.ApplicationModel.DataTransfer.StandardDataFormats.Text))
+        {
+            e.AcceptedOperation = global::Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
+            _viewModel.IsDragOver = true;
+            AnimateSpringScale(new Vector3(1.05f, 1.05f, 1f), damping: 0.6f, periodMs: 42);
+        }
+    }
+
+    private void OnRootDragLeave(object sender, DragEventArgs e)
+    {
+        _viewModel.IsDragOver = false;
+        AnimateSpringScale(Vector3.One, damping: 0.68f, periodMs: 45);
+    }
+
+    private async void OnRootDrop(object sender, DragEventArgs e)
+    {
+        _viewModel.IsDragOver = false;
+        AnimateSpringScale(new Vector3(0.95f, 0.95f, 1f), damping: 0.55f, periodMs: 45);
+        AnimateSpringScale(Vector3.One, damping: 0.6f, periodMs: 55);
+
+        try
+        {
+            if (e.DataView.Contains(global::Windows.ApplicationModel.DataTransfer.StandardDataFormats.StorageItems))
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+                var paths = items.Select(i => i.Path).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                _viewModel.HandleDropFiles(paths);
+            }
+            else if (e.DataView.Contains(global::Windows.ApplicationModel.DataTransfer.StandardDataFormats.Text))
+            {
+                var text = await e.DataView.GetTextAsync();
+                _viewModel.HandleDropText(text);
+            }
+        }
+        catch { }
     }
 }

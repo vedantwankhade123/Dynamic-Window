@@ -75,8 +75,9 @@ public partial class MainNewtonndViewModel : ObservableObject
     public bool IsLowBatteryPrimary => PrimaryActivity?.Type == ActivityType.LowBattery;
     public bool IsBluetoothPrimary => PrimaryActivity?.Type == ActivityType.BluetoothAccessory;
     public bool IsIncomingCallPrimary => PrimaryActivity?.Type == ActivityType.IncomingCall;
+    public bool IsClipboardPrimary => PrimaryActivity?.Type == ActivityType.Clipboard;
     public bool IsTransferOrBuildPrimary => PrimaryActivity?.Type is ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper;
-    public bool IsAiOrOtherPrimary => PrimaryActivity is not null && !IsMusicPrimary && !IsTimerPrimary && !IsScreenRecordingPrimary && !IsFocusAssistPrimary && !IsLowBatteryPrimary && !IsBluetoothPrimary && !IsIncomingCallPrimary && !IsTransferOrBuildPrimary;
+    public bool IsAiOrOtherPrimary => PrimaryActivity is not null && !IsMusicPrimary && !IsTimerPrimary && !IsScreenRecordingPrimary && !IsFocusAssistPrimary && !IsLowBatteryPrimary && !IsBluetoothPrimary && !IsIncomingCallPrimary && !IsClipboardPrimary && !IsTransferOrBuildPrimary;
     public bool IsNonMusicPrimary => PrimaryActivity is not null && PrimaryActivity.Type != ActivityType.Music;
 
     public string TimerDisplay => PrimaryActivity?.Metadata.TryGetValue("Remaining", out var rem) == true ? rem : "0:00";
@@ -110,7 +111,11 @@ public partial class MainNewtonndViewModel : ObservableObject
     [ObservableProperty]
     private Color _mediaAccentColor = Color.FromArgb(255, 136, 36, 42);
 
+    [ObservableProperty]
+    private bool _isDragOver;
+
     private string? _lastExtractedArtPath;
+    private CancellationTokenSource? _toastCts;
 
     public Symbol CompactSymbol => PrimaryActivity?.Type switch
     {
@@ -121,6 +126,7 @@ public partial class MainNewtonndViewModel : ObservableObject
         ActivityType.FocusAssist => Symbol.WeatherMoon,
         ActivityType.BluetoothAccessory => Symbol.Headphones,
         ActivityType.IncomingCall => Symbol.Call,
+        ActivityType.Clipboard => Symbol.ClipboardPaste,
         ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall => Symbol.ArrowDownload,
         _ => Symbol.Sparkle
     };
@@ -180,6 +186,7 @@ public partial class MainNewtonndViewModel : ObservableObject
             _ = UpdateForegroundAppAsync();
         });
         _clipboardService.HistoryChanged += (_, _) => RunOnUi(RefreshClipboard);
+        _clipboardService.ItemCaptured += (_, entry) => RunOnUi(() => ShowTackToast(entry));
         _ = _clipboardService.RefreshAsync();
         _aiService.MessagesUpdated += (_, _) => RunOnUi(RefreshAiMessages);
         _settingsService.SettingsChanged += (_, s) => RunOnUi(() =>
@@ -215,6 +222,7 @@ public partial class MainNewtonndViewModel : ObservableObject
         OnPropertyChanged(nameof(IsLowBatteryPrimary));
         OnPropertyChanged(nameof(IsBluetoothPrimary));
         OnPropertyChanged(nameof(IsIncomingCallPrimary));
+        OnPropertyChanged(nameof(IsClipboardPrimary));
         OnPropertyChanged(nameof(IsTransferOrBuildPrimary));
         OnPropertyChanged(nameof(IsAiOrOtherPrimary));
         OnPropertyChanged(nameof(IsNonMusicPrimary));
@@ -269,8 +277,76 @@ public partial class MainNewtonndViewModel : ObservableObject
     }
 
     [RelayCommand] private void CopyClipboardText(string text) => _clipboardService.CopyText(text);
+    [RelayCommand] private async Task CopyClipboardItemAsync(ClipboardHistoryItem? item) { if (item is not null) await _clipboardService.CopyItemAsync(item); }
+    [RelayCommand] private void TogglePinClipboardItem(string id) => _clipboardService.TogglePin(id);
+    [RelayCommand] private void RemoveClipboardItem(string id) => _clipboardService.RemoveItem(id);
     [RelayCommand] private void ClearClipboard() => _clipboardService.ClearHistory();
     [RelayCommand] private Task RefreshClipboardAsync() => _clipboardService.RefreshAsync();
+
+    [RelayCommand]
+    private void OpenTackShelf()
+    {
+        _toastCts?.Cancel();
+        _activityService.AddOrUpdateActivity(new ActivityItem
+        {
+            Id = "newton-tack-shelf",
+            Type = ActivityType.Clipboard,
+            Title = "Tack Shelf",
+            Subtitle = $"{ClipboardItems.Count} items",
+            AccentHex = "#30D158",
+            Status = ActivityStatus.Active,
+            Priority = ActivityPriority.High,
+            IsSimulated = false
+        });
+        _activityService.SetPrimaryActivity("newton-tack-shelf");
+        VisualState = NewtonndVisualState.Expanded;
+    }
+
+    public void HandleDropFiles(IReadOnlyList<string> paths) => _clipboardService.AddDroppedFiles(paths);
+    public void HandleDropText(string text) => _clipboardService.AddDroppedText(text);
+
+    private void ShowTackToast(ClipboardHistoryItem entry)
+    {
+        if (!Settings.EnableClipboardTracking) return;
+
+        _toastCts?.Cancel();
+        _toastCts = new CancellationTokenSource();
+        var token = _toastCts.Token;
+
+        var title = entry.Kind switch
+        {
+            ClipboardItemKind.Image => "Screenshot Tacked",
+            ClipboardItemKind.File => "File Tacked",
+            _ => "Copied to Newton"
+        };
+
+        _activityService.AddOrUpdateActivity(new ActivityItem
+        {
+            Id = "newton-tack-shelf",
+            Type = ActivityType.Clipboard,
+            Title = title,
+            Subtitle = entry.Preview,
+            ImageUri = entry.ImagePath,
+            AccentHex = "#30D158",
+            Status = ActivityStatus.Active,
+            Priority = ActivityPriority.Urgent,
+            IsSimulated = false
+        });
+        _activityService.SetPrimaryActivity("newton-tack-shelf");
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(2600, token);
+                if (!token.IsCancellationRequested && VisualState == NewtonndVisualState.Compact)
+                {
+                    RunOnUi(() => _activityService.RemoveActivity("newton-tack-shelf"));
+                }
+            }
+            catch (TaskCanceledException) { }
+        }, token);
+    }
 
     private async Task UpdateMediaAccentAsync(string? path)
     {

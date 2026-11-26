@@ -9,6 +9,10 @@
     <Grid
         x:Name="RootShell"
         Background="Transparent"
+        AllowDrop="True"
+        DragOver="OnRootDragOver"
+        DragLeave="OnRootDragLeave"
+        Drop="OnRootDrop"
         PointerEntered="OnRootPointerEntered"
         PointerExited="OnRootPointerExited"
         PointerPressed="OnRootPointerPressed"
@@ -63,6 +67,19 @@
                 <controls:DashboardControl
                     x:Name="DashboardView"
                     Visibility="{Binding IsDashboard, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Tack Drop-Target Overlay -->
+                <Border
+                    CornerRadius="22"
+                    Background="#E608120C"
+                    BorderBrush="#30D158"
+                    BorderThickness="1.5"
+                    Visibility="{Binding IsDragOver, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                        <ic:SymbolIcon Symbol="Pin" FontSize="15" Foreground="#30D158" />
+                        <TextBlock Text="Drop to Tack to Newton" FontSize="12.5" FontWeight="SemiBold" Foreground="#30D158" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
     </Grid>
