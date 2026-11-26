@@ -138,13 +138,21 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
         }
     }
 
-    private Task RefreshTimelineAsync()
+    private async Task RefreshTimelineAsync()
     {
         var session = _currentSession;
-        if (session is null || !CurrentTrack.IsPlaying) return Task.CompletedTask;
+        if (session is null) return;
 
         try
         {
+            if (string.IsNullOrEmpty(CurrentTrack.ArtworkPath))
+            {
+                await RefreshMediaAsync();
+                return;
+            }
+
+            if (!CurrentTrack.IsPlaying) return;
+
             var timeline = session.GetTimelineProperties();
             var duration = timeline.EndTime > timeline.StartTime ? timeline.EndTime - timeline.StartTime : CurrentTrack.Duration;
             var position = timeline.Position >= timeline.StartTime ? timeline.Position - timeline.StartTime : CurrentTrack.Position;
@@ -157,8 +165,6 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
         {
             // Ignore transient COM read issues
         }
-
-        return Task.CompletedTask;
     }
 
     private void SyncActivity()

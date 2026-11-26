@@ -84,9 +84,9 @@ public partial class MainNewtonndViewModel : ObservableObject
     public string CompactSubtitle => PrimaryActivity?.Subtitle ?? "Ready";
     public double CompactProgress => PrimaryActivity?.Progress ?? 0;
     public bool HasCompactProgress => Settings.ShowProgressInCompact && PrimaryActivity?.Progress is not null;
-    public string? CompactArtworkPath => PrimaryActivity?.ImageUri ?? (IsMusicPrimary ? CurrentTrack?.ArtworkPath : null);
+    public string? CompactArtworkPath => PrimaryActivity?.ImageUri ?? (IsMusicPrimary ? (CurrentTrack?.ArtworkPath ?? CurrentTrack?.PlatformIconPath) : null);
     public bool HasCompactArtwork => !string.IsNullOrEmpty(CompactArtworkPath);
-    public bool HasTrackArtwork => !string.IsNullOrEmpty(CurrentTrack?.ArtworkPath);
+    public bool HasTrackArtwork => !string.IsNullOrEmpty(CurrentTrack?.ArtworkPath ?? CurrentTrack?.PlatformIconPath);
     public string? PlatformIconPath => IsMusicPrimary ? CurrentTrack?.PlatformIconPath : null;
     public bool HasPlatformIcon => Settings.ShowPlatformBadge && !string.IsNullOrEmpty(PlatformIconPath);
     public string PlatformLabel => IsMusicPrimary ? (CurrentTrack?.SourceApp ?? "Media") : "Newton";
