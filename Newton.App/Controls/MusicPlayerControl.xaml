@@ -10,18 +10,7 @@
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
-    <Grid>
-        <!-- Ambient Music-Synced Gradient Layer -->
-        <Border CornerRadius="22">
-            <Border.Background>
-                <LinearGradientBrush x:Name="AmbientBrush" StartPoint="0.5,0" EndPoint="0.5,1">
-                    <GradientStop Color="#000000" Offset="0.0" />
-                    <GradientStop Color="#09090B" Offset="0.32" />
-                    <GradientStop x:Name="GlowStop" Color="#887F1D1D" Offset="1.0" />
-                </LinearGradientBrush>
-            </Border.Background>
-        </Border>
-
+    <Grid Background="#000000">
         <Grid Padding="18,14,16,14" RowSpacing="11">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

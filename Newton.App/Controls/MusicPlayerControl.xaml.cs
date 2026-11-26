@@ -1,52 +1,26 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Newton.App.ViewModels;
-using Windows.Foundation;
-using Windows.UI;
 
 namespace Newton.App.Controls;
 
 public sealed partial class MusicPlayerControl : UserControl
 {
-    private readonly DispatcherTimer _gradTimer;
-    private double _phase;
+    private readonly DispatcherTimer _scrubberTimer;
 
     public MusicPlayerControl()
     {
         InitializeComponent();
-        _gradTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(60) };
-        _gradTimer.Tick += OnGradientTick;
-        Loaded += (_, _) => _gradTimer.Start();
-        Unloaded += (_, _) => _gradTimer.Stop();
+        _scrubberTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _scrubberTimer.Tick += (_, _) => UpdateScrubber();
+        Loaded += (_, _) => _scrubberTimer.Start();
+        Unloaded += (_, _) => _scrubberTimer.Stop();
         ScrubberTrack.SizeChanged += (_, _) => UpdateScrubber();
     }
 
-    private void OnGradientTick(object? sender, object e)
+    private void UpdateScrubber()
     {
         if (DataContext is not MainNewtonndViewModel vm) return;
-
-        UpdateScrubber(vm);
-
-        var c = vm.MediaAccentColor;
-        if (vm.CurrentTrack?.IsPlaying == true)
-        {
-            _phase += 0.08;
-            byte alpha = (byte)(130 + 65 * Math.Sin(_phase));
-            GlowStop.Color = Color.FromArgb(alpha, c.R, c.G, c.B);
-            double x = 0.5 + 0.25 * Math.Sin(_phase * 0.7);
-            AmbientBrush.EndPoint = new Point(x, 1.0);
-        }
-        else
-        {
-            GlowStop.Color = Color.FromArgb(60, c.R, c.G, c.B);
-            AmbientBrush.EndPoint = new Point(0.5, 1.0);
-        }
-    }
-
-    private void UpdateScrubber(MainNewtonndViewModel? vm = null)
-    {
-        vm ??= DataContext as MainNewtonndViewModel;
-        if (vm is null) return;
 
         double totalW = ScrubberTrack.ActualWidth;
         if (totalW <= 0) return;
