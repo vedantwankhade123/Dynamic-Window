@@ -1,0 +1,65 @@
+<Window
+    x:Class="Newton.App.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Newton.App.Controls"
+    xmlns:conv="using:Newton.App.Converters">
+
+    <Grid
+        x:Name="RootShell"
+        Background="Transparent"
+        PointerPressed="OnRootPointerPressed"
+        DoubleTapped="OnRootDoubleTapped">
+        <Grid.Resources>
+            <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        </Grid.Resources>
+
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="Toggle Expand" Command="{Binding ToggleExpandCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE70D;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Open Dashboard" Command="{Binding OpenDashboardCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE80F;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem Text="Manage Newton..." Command="{Binding OpenManageCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE9E9;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Settings..." Command="{Binding OpenSettingsCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE713;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem Text="Exit Newton" Click="OnExitClick">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE711;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </Grid.ContextFlyout>
+
+        <!-- Main Pill / Card Surface -->
+        <Border
+            x:Name="NewtonndContainer"
+            Background="{StaticResource NewtonPillBackgroundBrush}"
+            BorderBrush="{StaticResource NewtonBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="23">
+
+            <Grid>
+                <!-- Compact State -->
+                <controls:CompactNewtonndControl
+                    x:Name="CompactView"
+                    Visibility="{Binding IsCompact, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Expanded State -->
+                <controls:ExpandedNewtonndControl
+                    x:Name="ExpandedView"
+                    Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Dashboard State -->
+                <controls:DashboardControl
+                    x:Name="DashboardView"
+                    Visibility="{Binding IsDashboard, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
