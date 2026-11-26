@@ -2,10 +2,11 @@
     x:Class="Newton.App.Views.ManageWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ic="using:FluentIcons.WinUI"
     xmlns:conv="using:Newton.App.Converters"
     Title="Newton — Control &amp; Management Center">
 
-    <Grid Background="{StaticResource NewtonSurfaceBrush}" Padding="24" RowSpacing="18">
+    <Grid Background="#09090C" Padding="24" RowSpacing="18">
         <Grid.Resources>
             <conv:HexToBrushConverter x:Key="HexToBrush" />
         </Grid.Resources>
@@ -14,45 +15,78 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header Bar -->
-        <Grid Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Border Width="34" Height="34" CornerRadius="17" Background="#000000" BorderBrush="#26FFFFFF" BorderThickness="1">
-                    <FontIcon Glyph="&#xE945;" FontSize="15" Foreground="{StaticResource NewtonAccentBrush}" />
-                </Border>
-                <StackPanel Spacing="1">
-                    <TextBlock Text="Newton Control &amp; Management" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource NewtonTextPrimaryBrush}" />
-                    <TextBlock Text="Manage live Windows activities, timers, newtonnd placement, and system telemetry" FontSize="12" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
+        <!-- Top Control Bar -->
+        <Border
+            Grid.Row="0"
+            Background="#111116"
+            BorderBrush="#1EFFFFFF"
+            BorderThickness="1"
+            CornerRadius="16"
+            Padding="16,12">
+            <Grid>
+                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Border Width="38" Height="38" CornerRadius="19" Background="#000000" BorderBrush="#28FFFFFF" BorderThickness="1">
+                        <ic:SymbolIcon Symbol="Sparkle" FontSize="17" Foreground="{StaticResource NewtonAccentBrush}" />
+                    </Border>
+                    <StackPanel Spacing="1">
+                        <TextBlock Text="Newton Control Center" FontSize="17" FontWeight="SemiBold" Foreground="#FFFFFF" />
+                        <TextBlock Text="Always-on-top Windows Dynamic Island • Live Activities &amp; Configuration" FontSize="11.5" Foreground="#9CA3AF" />
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="Compact" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding CollapseCommand}" />
-                <Button Content="Expanded" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding ToggleExpandCommand}" />
-                <Button Content="Dashboard" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding OpenDashboardCommand}" />
-                <Button Content="All Settings" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding OpenSettingsCommand}" />
-            </StackPanel>
-        </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding CollapseCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ic:SymbolIcon Symbol="Subtract" FontSize="13" />
+                            <TextBlock Text="Compact" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding ToggleExpandCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ic:SymbolIcon Symbol="ChevronDown" FontSize="13" />
+                            <TextBlock Text="Expanded" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding OpenDashboardCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ic:SymbolIcon Symbol="Grid" FontSize="13" />
+                            <TextBlock Text="Dashboard" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Background="#1F60A5FA" BorderBrush="#4060A5FA" BorderThickness="1" CornerRadius="14" Padding="12,6" Command="{Binding OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ic:SymbolIcon Symbol="Settings" FontSize="13" Foreground="#93C5FD" />
+                            <TextBlock Text="Settings" FontSize="12" FontWeight="Medium" Foreground="#E0F2FE" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        <!-- Main Management Grid -->
+        <!-- Two-Column Management Workspace -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <Grid ColumnSpacing="16" RowSpacing="16">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.1*" />
+                    <ColumnDefinition Width="1.12*" />
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Left Column: Timers, Active Activities, Windows Shortcuts -->
+                <!-- Left Column -->
                 <StackPanel Grid.Column="0" Spacing="14">
                     <!-- Focus & Timers -->
-                    <Border Background="{StaticResource NewtonCardGradientBrush}" BorderBrush="{StaticResource NewtonBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                    <Border Background="#111116" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="16" Padding="16">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="FOCUS &amp; TIMERS" Style="{StaticResource NewtonSectionHeaderStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ic:SymbolIcon Symbol="Timer" FontSize="15" Foreground="#F59E0B" />
+                                <TextBlock Text="FOCUS &amp; TIMERS" Style="{StaticResource NewtonSectionHeaderStyle}" VerticalAlignment="Center" />
+                            </StackPanel>
+
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Button Content="5 min" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding StartTimer5MinCommand}" />
                                 <Button Content="15 min" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding StartTimer15MinCommand}" />
-                                <Button Content="25 min Pomodoro" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding StartPomodoro25MinCommand}" />
+                                <Button Content="25 min Pomodoro" Background="#24F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="14" Padding="12,5" FontSize="11.5" Foreground="#FCD34D" Command="{Binding StartPomodoro25MinCommand}" />
                             </StackPanel>
+
                             <Grid ColumnSpacing="8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -60,32 +94,40 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <NumberBox Grid.Column="0" Value="{Binding CustomTimerMinutes, Mode=TwoWay}" Minimum="1" Maximum="180" Width="90" />
-                                <Button Grid.Column="1" Content="Start Custom (min)" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding StartCustomTimerCommand}" />
-                                <Button Grid.Column="2" Content="Pause/Resume" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding ToggleTimerPauseCommand}" />
-                                <Button Grid.Column="3" Content="Stop" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding StopTimerCommand}" />
+                                <NumberBox Grid.Column="0" Value="{Binding CustomTimerMinutes, Mode=TwoWay}" Minimum="1" Maximum="180" Width="88" />
+                                <Button Grid.Column="1" Content="Start (min)" Style="{StaticResource NewtonPillButtonStyle}" Command="{Binding StartCustomTimerCommand}" />
+                                <Button Grid.Column="2" Style="{StaticResource NewtonIconButtonStyle}" Command="{Binding ToggleTimerPauseCommand}" ToolTipService.ToolTip="Pause / Resume">
+                                    <ic:SymbolIcon Symbol="Pause" FontSize="13" />
+                                </Button>
+                                <Button Grid.Column="3" Style="{StaticResource NewtonIconButtonStyle}" Command="{Binding StopTimerCommand}" ToolTipService.ToolTip="Stop Timer">
+                                    <ic:SymbolIcon Symbol="Dismiss" FontSize="13" />
+                                </Button>
                             </Grid>
                         </StackPanel>
                     </Border>
 
-                    <!-- Live Activities -->
-                    <Border Background="{StaticResource NewtonCardGradientBrush}" BorderBrush="{StaticResource NewtonBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                    <!-- Active Windows Activities -->
+                    <Border Background="#111116" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="16" Padding="16">
                         <StackPanel Spacing="10">
                             <Grid>
-                                <TextBlock Text="ACTIVE WINDOWS ACTIVITIES" Style="{StaticResource NewtonSectionHeaderStyle}" />
-                                <TextBlock Text="Click to focus in Newtonnd" FontSize="10.5" Foreground="{StaticResource NewtonTextMutedBrush}" HorizontalAlignment="Right" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ic:SymbolIcon Symbol="Pulse" FontSize="15" Foreground="#60A5FA" />
+                                    <TextBlock Text="LIVE WINDOWS ACTIVITIES" Style="{StaticResource NewtonSectionHeaderStyle}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock Text="Click to focus pill" FontSize="10.5" Foreground="#64748B" HorizontalAlignment="Right" VerticalAlignment="Center" />
                             </Grid>
+
                             <ItemsControl ItemsSource="{Binding Activities}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Button
                                             HorizontalAlignment="Stretch"
                                             HorizontalContentAlignment="Stretch"
-                                            Background="#12FFFFFF"
-                                            BorderBrush="#18FFFFFF"
+                                            Background="#17171F"
+                                            BorderBrush="#1AFFFFFF"
                                             BorderThickness="1"
-                                            CornerRadius="10"
-                                            Padding="12,8"
+                                            CornerRadius="12"
+                                            Padding="12,9"
                                             Margin="0,0,0,6"
                                             Tag="{Binding Id}"
                                             Click="OnActivityFocusClick">
@@ -95,12 +137,16 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <FontIcon Grid.Column="0" Glyph="{Binding IconGlyph}" FontSize="14" Foreground="{Binding AccentHex, Converter={StaticResource HexToBrush}}" />
+                                                <Border Grid.Column="0" Width="28" Height="28" CornerRadius="14" Background="#14FFFFFF">
+                                                    <ic:SymbolIcon Symbol="Sparkle" FontSize="13" Foreground="{Binding AccentHex, Converter={StaticResource HexToBrush}}" />
+                                                </Border>
                                                 <StackPanel Grid.Column="1" Spacing="1">
-                                                    <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource NewtonTextPrimaryBrush}" />
-                                                    <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
+                                                    <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="SemiBold" Foreground="#F8FAFC" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="#94A3B8" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="10.5" Foreground="{StaticResource NewtonTextMutedBrush}" VerticalAlignment="Center" />
+                                                <Border Grid.Column="2" Background="#12FFFFFF" CornerRadius="8" Padding="8,3" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Status}" FontSize="10" Foreground="#94A3B8" />
+                                                </Border>
                                             </Grid>
                                         </Button>
                                     </DataTemplate>
@@ -109,14 +155,17 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Windows Quick Actions -->
-                    <Border Background="{StaticResource NewtonCardGradientBrush}" BorderBrush="{StaticResource NewtonBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                    <!-- Windows System Tools -->
+                    <Border Background="#111116" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="16" Padding="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="WINDOWS SYSTEM TOOLS" Style="{StaticResource NewtonSectionHeaderStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ic:SymbolIcon Symbol="Apps" FontSize="15" Foreground="#818CF8" />
+                                <TextBlock Text="WINDOWS SYSTEM TOOLS" Style="{StaticResource NewtonSectionHeaderStyle}" VerticalAlignment="Center" />
+                            </StackPanel>
                             <ItemsControl ItemsSource="{Binding QuickControls}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="128" ItemHeight="52" />
+                                        <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="130" ItemHeight="52" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -126,17 +175,17 @@
                                             HorizontalAlignment="Stretch"
                                             VerticalAlignment="Stretch"
                                             HorizontalContentAlignment="Left"
-                                            Background="#14FFFFFF"
+                                            Background="#17171F"
                                             BorderBrush="#1AFFFFFF"
                                             BorderThickness="1"
-                                            CornerRadius="10"
+                                            CornerRadius="12"
                                             Padding="10,6"
                                             Click="OnQuickControlClick">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="{Binding IconGlyph}" FontSize="14" Foreground="{StaticResource NewtonAccentBrush}" />
+                                                <ic:SymbolIcon Symbol="Open" FontSize="14" Foreground="#60A5FA" />
                                                 <StackPanel Spacing="0">
-                                                    <TextBlock Text="{Binding Title}" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource NewtonTextPrimaryBrush}" />
-                                                    <TextBlock Text="{Binding Subtitle}" FontSize="9.5" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
+                                                    <TextBlock Text="{Binding Title}" FontSize="11.5" FontWeight="SemiBold" Foreground="#F8FAFC" />
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="9.5" Foreground="#94A3B8" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </Button>
@@ -147,13 +196,16 @@
                     </Border>
                 </StackPanel>
 
-                <!-- Right Column: Real System Telemetry + Quick Newtonnd Configuration -->
+                <!-- Right Column -->
                 <StackPanel Grid.Column="1" Spacing="14">
                     <!-- Real System Telemetry -->
-                    <Border Background="{StaticResource NewtonCardGradientBrush}" BorderBrush="{StaticResource NewtonBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
-                        <StackPanel Spacing="10">
-                            <TextBlock Text="LIVE SYSTEM TELEMETRY (WINDOWS API)" Style="{StaticResource NewtonSectionHeaderStyle}" />
-                            <Grid ColumnSpacing="12" RowSpacing="8">
+                    <Border Background="#111116" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="16" Padding="16">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ic:SymbolIcon Symbol="DeveloperBoard" FontSize="15" Foreground="#34D399" />
+                                <TextBlock Text="LIVE SYSTEM TELEMETRY" Style="{StaticResource NewtonSectionHeaderStyle}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Grid ColumnSpacing="12" RowSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
@@ -164,66 +216,73 @@
                                 </Grid.RowDefinitions>
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="CPU Usage" FontSize="11" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
+                                    <TextBlock Text="CPU Usage" FontSize="11" Foreground="#94A3B8" />
                                     <StackPanel Orientation="Horizontal" Spacing="2">
-                                        <TextBlock Text="{Binding SystemStats.CpuUsagePercent}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource NewtonTextPrimaryBrush}" />
-                                        <TextBlock Text="%" FontSize="13" Foreground="{StaticResource NewtonTextSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding SystemStats.CpuUsagePercent}" FontSize="20" FontWeight="SemiBold" Foreground="#FFFFFF" />
+                                        <TextBlock Text="%" FontSize="13" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,2" />
                                     </StackPanel>
                                     <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.CpuUsagePercent}" Height="4" CornerRadius="2" Foreground="#60A5FA" Background="#1FFFFFFF" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Memory (RAM)" FontSize="11" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
+                                    <TextBlock Text="Memory (RAM)" FontSize="11" Foreground="#94A3B8" />
                                     <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <TextBlock Text="{Binding SystemStats.RamUsedGb}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource NewtonTextPrimaryBrush}" />
-                                        <TextBlock Text="/" FontSize="13" Foreground="{StaticResource NewtonTextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
-                                        <TextBlock Text="{Binding SystemStats.RamTotalGb}" FontSize="13" Foreground="{StaticResource NewtonTextSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
-                                        <TextBlock Text="GB" FontSize="12" Foreground="{StaticResource NewtonTextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding SystemStats.RamUsedGb}" FontSize="20" FontWeight="SemiBold" Foreground="#FFFFFF" />
+                                        <TextBlock Text="/" FontSize="13" Foreground="#64748B" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding SystemStats.RamTotalGb}" FontSize="13" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="GB" FontSize="12" Foreground="#64748B" VerticalAlignment="Bottom" Margin="0,0,0,2" />
                                     </StackPanel>
                                     <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.RamUsagePercent}" Height="4" CornerRadius="2" Foreground="#818CF8" Background="#1FFFFFFF" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Battery" FontSize="11" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
+                                    <TextBlock Text="Battery" FontSize="11" Foreground="#94A3B8" />
                                     <StackPanel Orientation="Horizontal" Spacing="2">
-                                        <TextBlock Text="{Binding SystemStats.BatteryPercent}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource NewtonTextPrimaryBrush}" />
-                                        <TextBlock Text="%" FontSize="13" Foreground="{StaticResource NewtonTextSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding SystemStats.BatteryPercent}" FontSize="20" FontWeight="SemiBold" Foreground="#FFFFFF" />
+                                        <TextBlock Text="%" FontSize="13" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,2" />
                                     </StackPanel>
                                     <ProgressBar Minimum="0" Maximum="100" Value="{Binding SystemStats.BatteryPercent}" Height="4" CornerRadius="2" Foreground="#34D399" Background="#1FFFFFFF" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Network (Mbps)" FontSize="11" Foreground="{StaticResource NewtonTextSecondaryBrush}" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding SystemStats.NetworkDownMbps}" FontSize="15" FontWeight="SemiBold" Foreground="#34D399" />
-                                        <TextBlock Text="↓" FontSize="13" Foreground="#34D399" />
-                                        <TextBlock Text="{Binding SystemStats.NetworkUpMbps}" FontSize="15" FontWeight="SemiBold" Foreground="#60A5FA" />
-                                        <TextBlock Text="↑" FontSize="13" Foreground="#60A5FA" />
+                                    <TextBlock Text="Network (Mbps)" FontSize="11" Foreground="#94A3B8" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="{Binding SystemStats.NetworkDownMbps}" FontSize="16" FontWeight="SemiBold" Foreground="#34D399" />
+                                        <ic:SymbolIcon Symbol="ArrowDown" FontSize="13" Foreground="#34D399" />
+                                        <TextBlock Text="{Binding SystemStats.NetworkUpMbps}" FontSize="16" FontWeight="SemiBold" Foreground="#60A5FA" />
+                                        <ic:SymbolIcon Symbol="ArrowUp" FontSize="13" Foreground="#60A5FA" />
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
                     </Border>
 
-                    <!-- Quick Newtonnd Configuration -->
-                    <Border Background="{StaticResource NewtonCardGradientBrush}" BorderBrush="{StaticResource NewtonBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="16">
+                    <!-- Quick Pill Configuration -->
+                    <Border Background="#111116" BorderBrush="#1EFFFFFF" BorderThickness="1" CornerRadius="16" Padding="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="NEWTONND CONFIGURATION" Style="{StaticResource NewtonSectionHeaderStyle}" />
-                            <ToggleSwitch Header="Newtonnd Visible" IsOn="{Binding Settings.IsNewtonndEnabled, Mode=TwoWay}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ic:SymbolIcon Symbol="Options" FontSize="15" Foreground="#A78BFA" />
+                                <TextBlock Text="PILL CONFIGURATION" Style="{StaticResource NewtonSectionHeaderStyle}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <ToggleSwitch Header="Pill Visible (Always On Top)" IsOn="{Binding Settings.IsNewtonndEnabled, Mode=TwoWay}" />
                             <ToggleSwitch Header="Click Outside to Collapse" IsOn="{Binding Settings.ClickOutsideToCollapse, Mode=TwoWay}" />
                             <ToggleSwitch Header="Drag to Reposition" IsOn="{Binding Settings.DragToReposition, Mode=TwoWay}" />
                             <Slider Header="Compact Width (px)" Minimum="180" Maximum="300" StepFrequency="4" Value="{Binding Settings.CompactWidth, Mode=TwoWay}" />
                             <Slider Header="Compact Height (px)" Minimum="38" Maximum="60" StepFrequency="2" Value="{Binding Settings.CompactHeight, Mode=TwoWay}" />
-                            <Slider Header="Newtonnd Opacity" Minimum="0.5" Maximum="1.0" StepFrequency="0.02" Value="{Binding Settings.NewtonndOpacity, Mode=TwoWay}" />
+                            <Slider Header="Pill Opacity" Minimum="0.5" Maximum="1.0" StepFrequency="0.02" Value="{Binding Settings.NewtonndOpacity, Mode=TwoWay}" />
                             <Button
-                                Content="Apply &amp; Save to SQLite"
                                 HorizontalAlignment="Right"
                                 Background="{StaticResource NewtonAccentBrush}"
-                                Foreground="{StaticResource NewtonVoidBrush}"
+                                Foreground="#070709"
                                 CornerRadius="14"
-                                Padding="14,6"
+                                Padding="14,7"
                                 FontWeight="SemiBold"
-                                Command="{Binding SaveQuickSettingsCommand}" />
+                                Command="{Binding SaveQuickSettingsCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <ic:SymbolIcon Symbol="Save" FontSize="14" />
+                                    <TextBlock Text="Apply &amp; Save" FontSize="12" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Border>
                 </StackPanel>

@@ -87,7 +87,7 @@ public sealed partial class MainWindow : Window
         {
             NewtonndVisualState.Compact => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0),
             NewtonndVisualState.Expanded => GetExpandedDimensions(),
-            NewtonndVisualState.Dashboard => (780.0, 560.0, 24.0),
+            NewtonndVisualState.Dashboard => (780.0, 560.0, 20.0),
             _ => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0)
         };
 
@@ -144,15 +144,15 @@ public sealed partial class MainWindow : Window
     {
         return _viewModel.PrimaryActivity?.Type switch
         {
-            ActivityType.Music => (348, 166, 32),
-            ActivityType.LowBattery => (276, 48, 24),
-            ActivityType.Timer or ActivityType.Pomodoro => (328, 66, 33),
-            ActivityType.ScreenRecording => (310, 62, 31),
-            ActivityType.FocusAssist => (304, 62, 31),
-            ActivityType.BluetoothAccessory => (290, 62, 31),
-            ActivityType.IncomingCall => (336, 64, 32),
-            ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper => (334, 66, 33),
-            _ => (340, 66, 33)
+            ActivityType.Music => (372, 150, 22),
+            ActivityType.LowBattery => (276, 46, 23),
+            ActivityType.Timer or ActivityType.Pomodoro => (336, 64, 32),
+            ActivityType.ScreenRecording => (318, 60, 30),
+            ActivityType.FocusAssist => (310, 60, 30),
+            ActivityType.BluetoothAccessory => (296, 60, 30),
+            ActivityType.IncomingCall => (342, 64, 32),
+            ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper => (340, 64, 32),
+            _ => (344, 64, 32)
         };
     }
 
