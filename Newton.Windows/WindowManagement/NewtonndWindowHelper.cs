@@ -47,6 +47,12 @@ public sealed class NewtonndWindowHelper
         exStyle |= WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
         SetWindowLongPtr(_hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
 
+        // Completely disable Windows 11 DWM border & non-client rendering so no squarish outline appears
+        int noBorder = unchecked((int)0xFFFFFFFE); // DWMWA_COLOR_NONE
+        DwmSetWindowAttribute(_hwnd, DWMWA_BORDER_COLOR, ref noBorder, sizeof(int));
+        int ncrpDisabled = 1; // DWMNCRP_DISABLED
+        DwmSetWindowAttribute(_hwnd, DWMWA_NCRENDERING_POLICY, ref ncrpDisabled, sizeof(int));
+
         EnsureTopMost();
     }
 
@@ -133,6 +139,11 @@ public sealed class NewtonndWindowHelper
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOACTIVATE = 0x0010;
+    private const int DWMWA_NCRENDERING_POLICY = 2;
+    private const int DWMWA_BORDER_COLOR = 34;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
     [DllImport("user32.dll")]
     private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);

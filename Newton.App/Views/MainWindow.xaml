@@ -44,8 +44,7 @@
         <Border
             x:Name="NewtonndContainer"
             Background="{StaticResource NewtonPillBackgroundBrush}"
-            BorderBrush="{StaticResource NewtonBorderBrush}"
-            BorderThickness="1"
+            BorderThickness="0"
             CornerRadius="23"
             RenderTransformOrigin="0.5,0">
 

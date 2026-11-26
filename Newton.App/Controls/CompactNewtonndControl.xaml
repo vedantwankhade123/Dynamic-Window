@@ -66,7 +66,7 @@
                     <ic:SymbolIcon Symbol="Previous" FontSize="12" />
                 </Button>
                 <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#2C2C35" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
-                    <ic:SymbolIcon Symbol="Play" FontSize="12" />
+                    <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="12" />
                 </Button>
                 <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
                     <ic:SymbolIcon Symbol="Next" FontSize="12" />

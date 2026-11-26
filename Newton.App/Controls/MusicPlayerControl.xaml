@@ -129,7 +129,7 @@
                     Foreground="#FFFFFF"
                     Command="{Binding TogglePlayPauseCommand}"
                     ToolTipService.ToolTip="Play / Pause">
-                    <ic:SymbolIcon Symbol="Play" FontSize="22" />
+                    <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="22" />
                 </Button>
                 <Button
                     Background="Transparent"
@@ -142,17 +142,33 @@
                 </Button>
             </StackPanel>
 
-            <Button
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Background="Transparent"
-                BorderThickness="0"
-                Padding="4"
-                Foreground="#9CA3AF"
-                Command="{Binding OpenDashboardCommand}"
-                ToolTipService.ToolTip="Windows Audio / Dashboard">
-                <ic:SymbolIcon Symbol="Speaker2" FontSize="16" />
-            </Button>
+            <!-- Inline Volume Controls + Speaker Toggle -->
+            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="2"
+                    Visibility="{Binding IsVolumeBarOpen, Converter={StaticResource BoolToVis}}">
+                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeDownCommand}" ToolTipService.ToolTip="Volume Down">
+                        <ic:SymbolIcon Symbol="Subtract" FontSize="11" />
+                    </Button>
+                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding ToggleMuteCommand}" ToolTipService.ToolTip="Mute / Unmute">
+                        <ic:SymbolIcon Symbol="SpeakerMute" FontSize="11" />
+                    </Button>
+                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeUpCommand}" ToolTipService.ToolTip="Volume Up">
+                        <ic:SymbolIcon Symbol="Add" FontSize="11" />
+                    </Button>
+                </StackPanel>
+
+                <Button
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="4"
+                    Foreground="#9CA3AF"
+                    Command="{Binding ToggleVolumeBarCommand}"
+                    ToolTipService.ToolTip="Volume Controls">
+                    <ic:SymbolIcon Symbol="{Binding SpeakerSymbol}" FontSize="16" />
+                </Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

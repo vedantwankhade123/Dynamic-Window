@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentIcons.Common;
@@ -93,6 +94,16 @@ public partial class MainNewtonndViewModel : ObservableObject
     [ObservableProperty]
     private string? _foregroundAppIconPath;
 
+    public Symbol PlayPauseSymbol => CurrentTrack?.IsPlaying == true ? Symbol.Pause : Symbol.Play;
+    public Symbol TimerPlayPauseSymbol => PrimaryActivity?.Status == ActivityStatus.Active ? Symbol.Pause : Symbol.Play;
+    public Symbol SpeakerSymbol => IsAudioMuted ? Symbol.SpeakerMute : Symbol.Speaker2;
+
+    [ObservableProperty]
+    private bool _isVolumeBarOpen;
+
+    [ObservableProperty]
+    private bool _isAudioMuted;
+
     public Symbol CompactSymbol => PrimaryActivity?.Type switch
     {
         ActivityType.Music => Symbol.MusicNote2,
@@ -143,6 +154,7 @@ public partial class MainNewtonndViewModel : ObservableObject
         {
             CurrentTrack = track;
             OnPropertyChanged(nameof(CurrentTrack));
+            OnPropertyChanged(nameof(PlayPauseSymbol));
             OnPropertyChanged(nameof(HasTrackArtwork));
             OnPropertyChanged(nameof(CompactArtworkPath));
             OnPropertyChanged(nameof(HasCompactArtwork));
@@ -194,8 +206,12 @@ public partial class MainNewtonndViewModel : ObservableObject
         OnPropertyChanged(nameof(IsAiOrOtherPrimary));
         OnPropertyChanged(nameof(IsNonMusicPrimary));
         OnPropertyChanged(nameof(TimerDisplay));
+        OnPropertyChanged(nameof(TimerPlayPauseSymbol));
+        OnPropertyChanged(nameof(PlayPauseSymbol));
         NotifyCompactProperties();
     }
+
+    partial void OnIsAudioMutedChanged(bool value) => OnPropertyChanged(nameof(SpeakerSymbol));
 
     partial void OnSelectedAiModelChanged(AiModelOption value)
     {
@@ -289,9 +305,31 @@ public partial class MainNewtonndViewModel : ObservableObject
     [RelayCommand] private void OpenDashboard() => VisualState = NewtonndVisualState.Dashboard;
     [RelayCommand] private void Collapse() => VisualState = NewtonndVisualState.Compact;
 
-    [RelayCommand] private void TogglePlayPause() => _musicService.TogglePlayPause();
+    [RelayCommand] private void TogglePlayPause()
+    {
+        _musicService.TogglePlayPause();
+        if (CurrentTrack is not null)
+        {
+            CurrentTrack.IsPlaying = !CurrentTrack.IsPlaying;
+            OnPropertyChanged(nameof(PlayPauseSymbol));
+        }
+    }
     [RelayCommand] private void NextTrack() => _musicService.NextTrack();
     [RelayCommand] private void PreviousTrack() => _musicService.PreviousTrack();
+
+    [RelayCommand] private void ToggleVolumeBar() => IsVolumeBarOpen = !IsVolumeBarOpen;
+    [RelayCommand] private void VolumeUp() { IsAudioMuted = false; SendMediaKey(0xAF); }
+    [RelayCommand] private void VolumeDown() { IsAudioMuted = false; SendMediaKey(0xAE); }
+    [RelayCommand] private void ToggleMute() { IsAudioMuted = !IsAudioMuted; SendMediaKey(0xAD); }
+
+    [DllImport("user32.dll")]
+    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+    private static void SendMediaKey(byte vk)
+    {
+        keybd_event(vk, 0, 0, UIntPtr.Zero);
+        keybd_event(vk, 0, 2, UIntPtr.Zero);
+    }
 
     [RelayCommand]
     private void SelectActivity(string activityId)

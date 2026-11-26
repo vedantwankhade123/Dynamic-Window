@@ -28,7 +28,7 @@
                     Width="42" Height="42" CornerRadius="21" Padding="0"
                     Background="#3D2B10" Foreground="#F59E0B" BorderThickness="0"
                     Tag="timer-toggle" Click="OnActionButtonClick" ToolTipService.ToolTip="Pause / Resume">
-                    <ic:SymbolIcon Symbol="Pause" FontSize="16" />
+                    <ic:SymbolIcon Symbol="{Binding TimerPlayPauseSymbol}" FontSize="16" />
                 </Button>
                 <Button
                     Width="42" Height="42" CornerRadius="21" Padding="0"
