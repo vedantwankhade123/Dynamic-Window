@@ -358,7 +358,7 @@ public sealed partial class MainWindow : Window
     {
         while (source is not null && source != RootShell)
         {
-            if (source is ButtonBase or TextBoxBase or Slider or ToggleSwitch) return true;
+            if (source is ButtonBase or TextBox or Slider or ToggleSwitch) return true;
             source = VisualTreeHelper.GetParent(source);
         }
 

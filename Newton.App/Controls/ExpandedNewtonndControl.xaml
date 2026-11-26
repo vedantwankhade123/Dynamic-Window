@@ -353,7 +353,7 @@
                                     <Grid ColumnSpacing="8" RowSpacing="5">
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="42" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                        <Border Grid.RowSpan="2" Width="42" Height="54" CornerRadius="10" Background="#25272D" VerticalAlignment="Center" ClipToBounds="True">
+                                        <Border Grid.RowSpan="2" Width="42" Height="54" CornerRadius="10" Background="#25272D" VerticalAlignment="Center">
                                             <Grid>
                                                 <Image Source="{Binding ImagePath}" Stretch="UniformToFill" Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}" />
                                                 <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="#64A9FF" Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}" />
