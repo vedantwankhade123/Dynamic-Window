@@ -56,6 +56,7 @@ public sealed class NewtonSettings
     public int AutoCollapseSeconds { get; set; } = 0;
     public bool ClickOutsideToCollapse { get; set; } = true;
     public bool DragToReposition { get; set; } = false;
+    public bool AutoDodgeBrowserTabs { get; set; } = true;
 
     // Activities & Per-Usecase Customization
     public bool EnableMusic { get; set; } = true;

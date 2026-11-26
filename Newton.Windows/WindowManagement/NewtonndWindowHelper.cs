@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Newton.Core.Models;
 using Microsoft.UI;
@@ -83,7 +84,7 @@ public sealed class NewtonndWindowHelper
         return list;
     }
 
-    public void UpdateBounds(double dipWidth, double dipHeight, double cornerRadiusDip, NewtonSettings settings)
+    public void UpdateBounds(double dipWidth, double dipHeight, double cornerRadiusDip, NewtonSettings settings, bool dodgeBrowser = false)
     {
         var scale = GetDpiScale();
         int pixelWidth = Math.Max(100, (int)Math.Round(dipWidth * scale));
@@ -100,13 +101,22 @@ public sealed class NewtonndWindowHelper
         int offsetX = (int)Math.Round(settings.HorizontalOffset * scale);
         int offsetY = (int)Math.Round(settings.VerticalOffset * scale);
 
-        int x = settings.PositionMode switch
+        int x;
+        if (dodgeBrowser && settings.PositionMode == NewtonPositionMode.TopCenter)
         {
-            NewtonPositionMode.TopLeft => bounds.X + (int)(20 * scale) + offsetX,
-            NewtonPositionMode.TopRight => bounds.X + bounds.Width - pixelWidth - (int)(20 * scale) + offsetX,
-            NewtonPositionMode.Custom => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX,
-            _ => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX
-        };
+            // Slide into the empty titlebar area to the left of window Min/Max/Close buttons
+            x = bounds.X + bounds.Width - pixelWidth - (int)(175 * scale);
+        }
+        else
+        {
+            x = settings.PositionMode switch
+            {
+                NewtonPositionMode.TopLeft => bounds.X + (int)(20 * scale) + offsetX,
+                NewtonPositionMode.TopRight => bounds.X + bounds.Width - pixelWidth - (int)(20 * scale) + offsetX,
+                NewtonPositionMode.Custom => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX,
+                _ => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX
+            };
+        }
 
         int y = targetDisplay.OuterBounds.Y + offsetY;
 
@@ -124,6 +134,39 @@ public sealed class NewtonndWindowHelper
         SendMessage(_hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTCAPTION), IntPtr.Zero);
     }
 
+    public void SetClickThrough(bool enable)
+    {
+        var exStyle = GetWindowLongPtr(_hwnd, GWL_EXSTYLE).ToInt64();
+        if (enable) exStyle |= WS_EX_TRANSPARENT;
+        else exStyle &= ~WS_EX_TRANSPARENT;
+        SetWindowLongPtr(_hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
+    }
+
+    public static bool IsAltKeyDown() => (GetAsyncKeyState(0x12) & 0x8000) != 0;
+
+    public static bool IsBrowserAtTop()
+    {
+        try
+        {
+            var fg = GetForegroundWindow();
+            if (fg == IntPtr.Zero) return false;
+
+            GetWindowThreadProcessId(fg, out uint pid);
+            if (pid == 0 || pid == Environment.ProcessId) return false;
+
+            using var proc = Process.GetProcessById((int)pid);
+            var name = proc.ProcessName.ToLowerInvariant();
+            if (name is not ("chrome" or "msedge" or "brave" or "firefox" or "opera" or "vivaldi" or "arc"))
+                return false;
+
+            return GetWindowRect(fg, out var r) && r.Top <= 24;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private const int GWL_STYLE = -16;
     private const int GWL_EXSTYLE = -20;
     private const long WS_CAPTION = 0x00C00000L;
@@ -133,6 +176,7 @@ public sealed class NewtonndWindowHelper
     private const long WS_SYSMENU = 0x00080000L;
     private const long WS_EX_TOOLWINDOW = 0x00000080L;
     private const long WS_EX_TOPMOST = 0x00000008L;
+    private const long WS_EX_TRANSPARENT = 0x00000020L;
     private const int WM_NCLBUTTONDOWN = 0x00A1;
     private const int HTCAPTION = 2;
     private static readonly IntPtr HWND_TOPMOST = new(-1);
@@ -168,4 +212,19 @@ public sealed class NewtonndWindowHelper
 
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT { public int Left, Top, Right, Bottom; }
 }

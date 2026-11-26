@@ -251,6 +251,7 @@
                         <Border Background="#121216" BorderBrush="#1AFFFFFF" BorderThickness="1" CornerRadius="14" Padding="18">
                             <StackPanel Spacing="12">
                                 <ToggleSwitch Header="Enable Newton Pill (Always On Top)" IsOn="{Binding Settings.IsNewtonndEnabled, Mode=TwoWay}" />
+                                <ToggleSwitch Header="Auto-Dodge Browser Tabs (Slide to Titlebar &amp; Hold Alt for Click-Through)" IsOn="{Binding Settings.AutoDodgeBrowserTabs, Mode=TwoWay}" />
                                 <ToggleSwitch Header="Expand Horizontally on Hover (Quick Controls)" IsOn="{Binding Settings.HoverToPeek, Mode=TwoWay}" />
                                 <ToggleSwitch Header="Show Platform Logo on Right (Spotify, Chrome, etc.)" IsOn="{Binding Settings.ShowPlatformBadge, Mode=TwoWay}" />
                                 <ToggleSwitch Header="Click Outside to Collapse" IsOn="{Binding Settings.ClickOutsideToCollapse, Mode=TwoWay}" />
