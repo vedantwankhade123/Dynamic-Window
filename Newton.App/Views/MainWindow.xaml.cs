@@ -188,7 +188,7 @@ public sealed partial class MainWindow : Window
     {
         return _viewModel.PrimaryActivity?.Type switch
         {
-            ActivityType.Music => (376, 186, 22),
+            ActivityType.Music => (368, 152, 22),
             ActivityType.LowBattery => (284, 52, 26),
             ActivityType.Timer or ActivityType.Pomodoro => (360, 128, 22),
             ActivityType.ScreenRecording => (318, 60, 30),

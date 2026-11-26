@@ -66,29 +66,21 @@
                     MaxLines="1" />
             </StackPanel>
 
-            <!-- Horizontal Hover-Expand Quick Controls -->
+            <!-- Horizontal Hover-Expand Quick Controls (Play/Pause, Previous, Forward) -->
             <StackPanel
                 Grid.Column="2"
                 Orientation="Horizontal"
                 Spacing="4"
                 VerticalAlignment="Center"
                 Visibility="{Binding IsHoverPeek, Converter={StaticResource BoolToVis}}">
-                <StackPanel Orientation="Horizontal" Spacing="2" Visibility="{Binding IsMusicPrimary, Converter={StaticResource BoolToVis}}">
-                    <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
-                        <ic:SymbolIcon Symbol="Previous" FontSize="12" />
-                    </Button>
-                    <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#2C2C35" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
-                        <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="12" />
-                    </Button>
-                    <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
-                        <ic:SymbolIcon Symbol="Next" FontSize="12" />
-                    </Button>
-                </StackPanel>
-                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding StartTimer5MinCommand}" ToolTipService.ToolTip="Quick 5m Timer">
-                    <ic:SymbolIcon Symbol="Timer" FontSize="12" />
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
+                    <ic:SymbolIcon Symbol="Previous" FontSize="12" />
                 </Button>
-                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding OpenManageCommand}" ToolTipService.ToolTip="Manage Newton">
-                    <ic:SymbolIcon Symbol="Wrench" FontSize="12" />
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#2C2C35" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
+                    <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="12" />
+                </Button>
+                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
+                    <ic:SymbolIcon Symbol="Next" FontSize="12" />
                 </Button>
             </StackPanel>
 
