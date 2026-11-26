@@ -316,6 +316,21 @@ public partial class MainNewtonndViewModel : ObservableObject
     }
     [RelayCommand] private void NextTrack() => _musicService.NextTrack();
     [RelayCommand] private void PreviousTrack() => _musicService.PreviousTrack();
+    [RelayCommand] private void SeekForward10()
+    {
+        if (CurrentTrack is null) return;
+        var next = CurrentTrack.Position + TimeSpan.FromSeconds(10);
+        if (CurrentTrack.Duration > TimeSpan.Zero && next > CurrentTrack.Duration) next = CurrentTrack.Duration;
+        _musicService.Seek(next);
+    }
+    [RelayCommand] private void SeekBack10()
+    {
+        if (CurrentTrack is null) return;
+        var prev = CurrentTrack.Position - TimeSpan.FromSeconds(10);
+        if (prev < TimeSpan.Zero) prev = TimeSpan.Zero;
+        _musicService.Seek(prev);
+    }
+    [RelayCommand] private void AddTimer1Min() => _timerService.StartTimer(Math.Max(60, _timerService.RemainingSeconds + 60), "Focus Timer");
 
     [RelayCommand] private void ToggleVolumeBar() => IsVolumeBarOpen = !IsVolumeBarOpen;
     [RelayCommand] private void VolumeUp() { IsAudioMuted = false; SendMediaKey(0xAF); }

@@ -10,14 +10,15 @@
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
-    <Grid Padding="18,16,18,14" RowSpacing="12">
+    <Grid Padding="18,16,18,14" RowSpacing="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Top Row: Album Art + Track/Artist + Live Equalizer Waveform -->
+        <!-- Row 0: Album Art + Track/Artist + Platform Logo + 9-Bar Smooth Waveform -->
         <Grid Grid.Row="0" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -61,7 +62,7 @@
                     MaxLines="1" />
             </StackPanel>
 
-            <!-- Right: Platform Logo + Live animated colorful waveform bars -->
+            <!-- Platform Logo + 9-Bar Dynamic Island Waveform -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <Border
                     Width="20" Height="20" CornerRadius="5"
@@ -69,17 +70,21 @@
                     ToolTipService.ToolTip="{Binding PlatformLabel}">
                     <Image Source="{Binding PlatformIconPath}" Stretch="Uniform" />
                 </Border>
-                <StackPanel x:Name="MusicWave" Orientation="Horizontal" Spacing="2.5" VerticalAlignment="Center">
-                    <Rectangle x:Name="W1" Width="2.5" Height="8" RadiusX="1.2" RadiusY="1.2" Fill="#FB7185" />
-                    <Rectangle x:Name="W2" Width="2.5" Height="15" RadiusX="1.2" RadiusY="1.2" Fill="#A78BFA" />
-                    <Rectangle x:Name="W3" Width="2.5" Height="11" RadiusX="1.2" RadiusY="1.2" Fill="#818CF8" />
-                    <Rectangle x:Name="W4" Width="2.5" Height="17" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" />
-                    <Rectangle x:Name="W5" Width="2.5" Height="9" RadiusX="1.2" RadiusY="1.2" Fill="#FB923C" />
+                <StackPanel x:Name="MusicWave" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                    <Rectangle x:Name="W1" Width="2.5" Height="6" RadiusX="1.2" RadiusY="1.2" Fill="#FB7185" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W2" Width="2.5" Height="11" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W3" Width="2.5" Height="16" RadiusX="1.2" RadiusY="1.2" Fill="#C084FC" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W4" Width="2.5" Height="19" RadiusX="1.2" RadiusY="1.2" Fill="#A78BFA" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W5" Width="2.5" Height="22" RadiusX="1.2" RadiusY="1.2" Fill="#818CF8" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W6" Width="2.5" Height="17" RadiusX="1.2" RadiusY="1.2" Fill="#60A5FA" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W7" Width="2.5" Height="13" RadiusX="1.2" RadiusY="1.2" Fill="#38BDF8" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W8" Width="2.5" Height="9" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" VerticalAlignment="Center" />
+                    <Rectangle x:Name="W9" Width="2.5" Height="5" RadiusX="1.2" RadiusY="1.2" Fill="#FB923C" VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
         </Grid>
 
-        <!-- Middle Row: Scrubber Bar + Timestamps -->
+        <!-- Row 1: Scrubber Bar + Timestamps -->
         <Grid Grid.Row="1" ColumnSpacing="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -110,44 +115,22 @@
                 VerticalAlignment="Center" />
         </Grid>
 
-        <!-- Bottom Row: Transport Controls + Audio Output Device -->
+        <!-- Row 2: Transport Controls + Volume -->
         <Grid Grid.Row="2">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="22">
-                <Button
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Padding="6"
-                    Foreground="#FFFFFF"
-                    Command="{Binding PreviousTrackCommand}"
-                    ToolTipService.ToolTip="Previous">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
                     <ic:SymbolIcon Symbol="Previous" FontSize="18" />
                 </Button>
-                <Button
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Padding="6"
-                    Foreground="#FFFFFF"
-                    Command="{Binding TogglePlayPauseCommand}"
-                    ToolTipService.ToolTip="Play / Pause">
+                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
                     <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="22" />
                 </Button>
-                <Button
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Padding="6"
-                    Foreground="#FFFFFF"
-                    Command="{Binding NextTrackCommand}"
-                    ToolTipService.ToolTip="Next">
+                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
                     <ic:SymbolIcon Symbol="Next" FontSize="18" />
                 </Button>
             </StackPanel>
 
-            <!-- Inline Volume Controls + Speaker Toggle -->
             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="2"
-                    Visibility="{Binding IsVolumeBarOpen, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal" Spacing="2" Visibility="{Binding IsVolumeBarOpen, Converter={StaticResource BoolToVis}}">
                     <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeDownCommand}" ToolTipService.ToolTip="Volume Down">
                         <ic:SymbolIcon Symbol="Subtract" FontSize="11" />
                     </Button>
@@ -159,14 +142,23 @@
                     </Button>
                 </StackPanel>
 
-                <Button
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Padding="4"
-                    Foreground="#9CA3AF"
-                    Command="{Binding ToggleVolumeBarCommand}"
-                    ToolTipService.ToolTip="Volume Controls">
+                <Button Background="Transparent" BorderThickness="0" Padding="4" Foreground="#9CA3AF" Command="{Binding ToggleVolumeBarCommand}" ToolTipService.ToolTip="Volume Controls">
                     <ic:SymbolIcon Symbol="{Binding SpeakerSymbol}" FontSize="16" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 3: Vertical Expansion Extra Options -->
+        <Grid Grid.Row="3" Padding="0,4,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Left">
+                <Button Content="-10s" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding SeekBack10Command}" />
+                <Button Content="+10s" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding SeekForward10Command}" />
+                <Button Content="5m Timer" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding StartTimer5MinCommand}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                <Button Content="Dashboard" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding OpenDashboardCommand}" />
+                <Button Style="{StaticResource NewtonIconButtonStyle}" Width="24" Height="24" CornerRadius="12" Command="{Binding CollapseCommand}" ToolTipService.ToolTip="Collapse">
+                    <ic:SymbolIcon Symbol="ChevronUp" FontSize="11" />
                 </Button>
             </StackPanel>
         </Grid>

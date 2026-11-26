@@ -105,7 +105,7 @@ public sealed partial class MainWindow : Window
         var (w, h, r) = _viewModel.VisualState switch
         {
             NewtonndVisualState.Compact => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0),
-            NewtonndVisualState.HoverPeek => (s.HoverPeekWidth, s.CompactHeight + 4, (s.CompactHeight + 4) / 2.0),
+            NewtonndVisualState.HoverPeek => (Math.Max(384.0, s.HoverPeekWidth), s.CompactHeight, s.CompactHeight / 2.0),
             NewtonndVisualState.Expanded => GetExpandedDimensions(),
             NewtonndVisualState.Dashboard => (780.0, 560.0, 20.0),
             _ => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0)
@@ -188,15 +188,15 @@ public sealed partial class MainWindow : Window
     {
         return _viewModel.PrimaryActivity?.Type switch
         {
-            ActivityType.Music => (372, 150, 22),
-            ActivityType.LowBattery => (276, 46, 23),
-            ActivityType.Timer or ActivityType.Pomodoro => (336, 64, 32),
+            ActivityType.Music => (376, 186, 22),
+            ActivityType.LowBattery => (284, 52, 26),
+            ActivityType.Timer or ActivityType.Pomodoro => (360, 128, 22),
             ActivityType.ScreenRecording => (318, 60, 30),
             ActivityType.FocusAssist => (310, 60, 30),
             ActivityType.BluetoothAccessory => (296, 60, 30),
             ActivityType.IncomingCall => (342, 64, 32),
             ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper => (340, 64, 32),
-            _ => (344, 64, 32)
+            _ => (356, 72, 22)
         };
     }
 

@@ -15,33 +15,50 @@
         <!-- 1. MUSIC CARD -->
         <controls:MusicPlayerControl Visibility="{Binding IsMusicPrimary, Converter={StaticResource BoolToVis}}" />
 
-        <!-- 2. TIMER / POMODORO PILL -->
-        <Grid Padding="12,8" Visibility="{Binding IsTimerPrimary, Converter={StaticResource BoolToVis}}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <!-- 2. TIMER / POMODORO VERTICAL CARD -->
+        <Grid Padding="16,12" RowSpacing="10" Visibility="{Binding IsTimerPrimary, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <Button
-                    Width="42" Height="42" CornerRadius="21" Padding="0"
-                    Background="#3D2B10" Foreground="#F59E0B" BorderThickness="0"
-                    Tag="timer-toggle" Click="OnActionButtonClick" ToolTipService.ToolTip="Pause / Resume">
-                    <ic:SymbolIcon Symbol="{Binding TimerPlayPauseSymbol}" FontSize="16" />
-                </Button>
-                <Button
-                    Width="42" Height="42" CornerRadius="21" Padding="0"
-                    Background="#2C2C2E" Foreground="#FFFFFF" BorderThickness="0"
-                    Tag="timer-stop" Click="OnActionButtonClick" ToolTipService.ToolTip="Cancel Timer">
-                    <ic:SymbolIcon Symbol="Dismiss" FontSize="15" />
-                </Button>
-            </StackPanel>
+            <Grid Grid.Row="0">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button
+                        Width="40" Height="40" CornerRadius="20" Padding="0"
+                        Background="#3D2B10" Foreground="#F59E0B" BorderThickness="0"
+                        Tag="timer-toggle" Click="OnActionButtonClick" ToolTipService.ToolTip="Pause / Resume">
+                        <ic:SymbolIcon Symbol="{Binding TimerPlayPauseSymbol}" FontSize="16" />
+                    </Button>
+                    <Button
+                        Width="40" Height="40" CornerRadius="20" Padding="0"
+                        Background="#2C2C2E" Foreground="#FFFFFF" BorderThickness="0"
+                        Tag="timer-stop" Click="OnActionButtonClick" ToolTipService.ToolTip="Cancel Timer">
+                        <ic:SymbolIcon Symbol="Dismiss" FontSize="15" />
+                    </Button>
+                </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,6,0">
-                <TextBlock Text="Timer" FontSize="13" Foreground="#F59E0B" VerticalAlignment="Bottom" Margin="0,0,0,4" />
-                <TextBlock Text="{Binding TimerDisplay}" FontSize="28" FontWeight="Light" Foreground="#F59E0B" VerticalAlignment="Center" />
-            </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="Timer" FontSize="13" Foreground="#F59E0B" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding TimerDisplay}" FontSize="28" FontWeight="Light" Foreground="#F59E0B" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+
+            <ProgressBar Grid.Row="1" Minimum="0" Maximum="100" Value="{Binding CompactProgress}" Height="4" CornerRadius="2" Foreground="#F59E0B" Background="#2C2C2E" />
+
+            <Grid Grid.Row="2">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button Content="+1 min" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding AddTimer1MinCommand}" />
+                    <Button Content="25m Pomodoro" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding StartPomodoro25MinCommand}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                    <Button Content="Dashboard" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding OpenDashboardCommand}" />
+                    <Button Style="{StaticResource NewtonIconButtonStyle}" Width="24" Height="24" CornerRadius="12" Command="{Binding CollapseCommand}" ToolTipService.ToolTip="Collapse">
+                        <ic:SymbolIcon Symbol="ChevronUp" FontSize="11" />
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
 
         <!-- 3. SCREEN RECORDING PILL -->
