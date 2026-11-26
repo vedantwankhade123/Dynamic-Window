@@ -37,17 +37,33 @@ public partial class App : Application
     {
         var logger = Services.GetService<ILogger<App>>();
         logger?.LogCritical(e.Exception, "Unhandled UI exception in Isla.");
+        try
+        {
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Isla");
+            Directory.CreateDirectory(dir);
+            File.AppendAllText(Path.Combine(dir, "error.log"), $"[{DateTime.Now:O}] {e.Exception}\n\n");
+        }
+        catch { }
         e.Handled = true;
     }
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        var settingsService = Services.GetRequiredService<ISettingsService>();
-        await settingsService.LoadAsync();
+        try
+        {
+            var settingsService = Services.GetRequiredService<ISettingsService>();
+            await settingsService.LoadAsync();
 
-        _mainWindow = new MainWindow();
-        _mainWindow.Activate();
-        OpenManageWindow();
+            _mainWindow = new MainWindow();
+            _mainWindow.Activate();
+            OpenManageWindow();
+        }
+        catch (Exception ex)
+        {
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Isla");
+            Directory.CreateDirectory(dir);
+            File.AppendAllText(Path.Combine(dir, "error.log"), $"[{DateTime.Now:O}] OnLaunched: {ex}\n\n");
+        }
     }
 
     public static void OpenSettingsWindow()

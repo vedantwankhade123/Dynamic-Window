@@ -36,7 +36,7 @@ public sealed class IslandWindowHelper
             presenter.SetBorderAndTitleBar(false, false);
         }
 
-        _appWindow.IsShownInSwitchers = false;
+        try { _appWindow.IsShownInSwitchers = false; } catch { /* Not implemented in unpackaged mode; WS_EX_TOOLWINDOW handles this */ }
 
         // Remove standard window border styles for crisp floating pill rendering
         var style = GetWindowLongPtr(_hwnd, GWL_STYLE).ToInt64();
