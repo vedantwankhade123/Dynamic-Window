@@ -23,18 +23,16 @@ public sealed partial class CompactNewtonndControl : UserControl
     {
         if (DataContext is not MainNewtonndViewModel vm || !vm.IsMusicPrimary) return;
 
+        var c = vm.MediaAccentColor;
         if (vm.CurrentTrack?.IsPlaying == true)
         {
             _phase += 0.1;
-            byte a = (byte)(95 + 55 * Math.Sin(_phase));
-            byte r = (byte)(140 + 50 * Math.Sin(_phase * 0.7));
-            byte g = (byte)(50 + 30 * Math.Cos(_phase * 0.5));
-            byte b = (byte)(110 + 70 * Math.Cos(_phase * 0.8));
-            CompactGlowStop.Color = Color.FromArgb(a, r, g, b);
+            byte a = (byte)(110 + 60 * Math.Sin(_phase));
+            CompactGlowStop.Color = Color.FromArgb(a, c.R, c.G, c.B);
         }
         else
         {
-            CompactGlowStop.Color = Color.FromArgb(40, 120, 40, 60);
+            CompactGlowStop.Color = Color.FromArgb(50, c.R, c.G, c.B);
         }
     }
 }

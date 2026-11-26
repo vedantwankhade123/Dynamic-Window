@@ -9,6 +9,9 @@ using Newton.Core.Interfaces;
 using Newton.Core.Models;
 using Newton.Core.Services;
 using Newton.Windows.WindowManagement;
+using Windows.Graphics.Imaging;
+using Windows.Storage;
+using Windows.UI;
 
 namespace Newton.App.ViewModels;
 
@@ -104,6 +107,11 @@ public partial class MainNewtonndViewModel : ObservableObject
     [ObservableProperty]
     private bool _isAudioMuted;
 
+    [ObservableProperty]
+    private Color _mediaAccentColor = Color.FromArgb(255, 136, 36, 42);
+
+    private string? _lastExtractedArtPath;
+
     public Symbol CompactSymbol => PrimaryActivity?.Type switch
     {
         ActivityType.Music => Symbol.MusicNote2,
@@ -158,6 +166,11 @@ public partial class MainNewtonndViewModel : ObservableObject
             OnPropertyChanged(nameof(HasTrackArtwork));
             OnPropertyChanged(nameof(CompactArtworkPath));
             OnPropertyChanged(nameof(HasCompactArtwork));
+            if (track.ArtworkPath != _lastExtractedArtPath)
+            {
+                _lastExtractedArtPath = track.ArtworkPath;
+                _ = UpdateMediaAccentAsync(track.ArtworkPath);
+            }
         });
         _notificationService.NotificationsChanged += (_, _) => RunOnUi(RefreshNotifications);
         _systemMonitorService.StatsUpdated += (_, stats) => RunOnUi(() =>
@@ -258,6 +271,57 @@ public partial class MainNewtonndViewModel : ObservableObject
     [RelayCommand] private void CopyClipboardText(string text) => _clipboardService.CopyText(text);
     [RelayCommand] private void ClearClipboard() => _clipboardService.ClearHistory();
     [RelayCommand] private Task RefreshClipboardAsync() => _clipboardService.RefreshAsync();
+
+    private async Task UpdateMediaAccentAsync(string? path)
+    {
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+            RunOnUi(() => MediaAccentColor = Color.FromArgb(255, 136, 36, 42));
+            return;
+        }
+
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(path);
+            using var stream = await file.OpenReadAsync();
+            var decoder = await BitmapDecoder.CreateAsync(stream);
+            var transform = new BitmapTransform { ScaledWidth = 10, ScaledHeight = 10 };
+            var pixels = await decoder.GetPixelDataAsync(
+                BitmapPixelFormat.Bgra8,
+                BitmapAlphaMode.Premultiplied,
+                transform,
+                ExifOrientationMode.IgnoreExifOrientation,
+                ColorManagementMode.DoNotColorManage);
+
+            var bytes = pixels.DetachPixelData();
+            double rSum = 0, gSum = 0, bSum = 0, weightSum = 0;
+            for (int i = 0; i + 3 < bytes.Length; i += 4)
+            {
+                byte b = bytes[i], g = bytes[i + 1], r = bytes[i + 2];
+                int max = Math.Max(r, Math.Max(g, b));
+                int min = Math.Min(r, Math.Min(g, b));
+                if (max < 45 || min > 225) continue; // ignore near-black & near-white
+
+                double saturationWeight = 1.0 + (max - min) / 64.0;
+                rSum += r * saturationWeight;
+                gSum += g * saturationWeight;
+                bSum += b * saturationWeight;
+                weightSum += saturationWeight;
+            }
+
+            if (weightSum > 0)
+            {
+                byte avgR = (byte)Math.Clamp(rSum / weightSum, 35, 230);
+                byte avgG = (byte)Math.Clamp(gSum / weightSum, 30, 210);
+                byte avgB = (byte)Math.Clamp(bSum / weightSum, 35, 230);
+                RunOnUi(() => MediaAccentColor = Color.FromArgb(255, avgR, avgG, avgB));
+            }
+        }
+        catch
+        {
+            // Keep previous color on transient decode errors
+        }
+    }
 
     private void InitializeQuickControls()
     {
