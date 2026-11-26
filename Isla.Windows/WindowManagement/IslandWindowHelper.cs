@@ -46,6 +46,17 @@ public sealed class IslandWindowHelper
         var exStyle = GetWindowLongPtr(_hwnd, GWL_EXSTYLE).ToInt64();
         exStyle |= WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
         SetWindowLongPtr(_hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
+
+        EnsureTopMost();
+    }
+
+    public void EnsureTopMost()
+    {
+        if (_appWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsAlwaysOnTop = true;
+        }
+        SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 
     public double GetDpiScale()
@@ -98,6 +109,7 @@ public sealed class IslandWindowHelper
         int cornerPx = (int)Math.Round(cornerRadiusDip * scale * 2);
         var rgn = CreateRoundRectRgn(0, 0, pixelWidth + 1, pixelHeight + 1, cornerPx, cornerPx);
         SetWindowRgn(_hwnd, rgn, true);
+        EnsureTopMost();
     }
 
     public void BeginDrag()
@@ -117,6 +129,13 @@ public sealed class IslandWindowHelper
     private const long WS_EX_TOPMOST = 0x00000008L;
     private const int WM_NCLBUTTONDOWN = 0x00A1;
     private const int HTCAPTION = 2;
+    private static readonly IntPtr HWND_TOPMOST = new(-1);
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);

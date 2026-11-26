@@ -120,11 +120,14 @@ public sealed partial class MainWindow : Window
 
     private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
     {
-        if (args.WindowActivationState == WindowActivationState.Deactivated &&
-            _settingsService.Current.ClickOutsideToCollapse &&
-            _viewModel.VisualState != IslandVisualState.Compact)
+        if (args.WindowActivationState == WindowActivationState.Deactivated)
         {
-            _viewModel.CollapseCommand.Execute(null);
+            if (_settingsService.Current.ClickOutsideToCollapse &&
+                _viewModel.VisualState != IslandVisualState.Compact)
+            {
+                _viewModel.CollapseCommand.Execute(null);
+            }
+            _windowHelper.EnsureTopMost();
         }
     }
 
