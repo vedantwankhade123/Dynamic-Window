@@ -3,6 +3,20 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Global Outfit Typography -->
+    <FontFamily x:Key="NewtonFontFamily">ms-appx:///Assets/Fonts/Outfit.ttf#Outfit</FontFamily>
+    <FontFamily x:Key="ContentControlThemeFontFamily">ms-appx:///Assets/Fonts/Outfit.ttf#Outfit</FontFamily>
+
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource NewtonFontFamily}" />
+    </Style>
+    <Style TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource NewtonFontFamily}" />
+    </Style>
+    <Style TargetType="MenuFlyoutItem">
+        <Setter Property="FontFamily" Value="{StaticResource NewtonFontFamily}" />
+    </Style>
+
     <!-- Newton Core Palette -->
     <Color x:Key="NewtonVoidBlack">#070709</Color>
     <Color x:Key="NewtonSurfaceDeep">#0B0B0F</Color>

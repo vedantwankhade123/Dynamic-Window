@@ -23,6 +23,7 @@ public sealed partial class CompactNewtonndControl : UserControl
         if (WaveformBars.Visibility != Visibility.Visible) return;
         Bar1.Height = _rng.Next(5, 14);
         Bar2.Height = _rng.Next(8, 17);
-        Bar3.Height = _rng.Next(4, 13);
+        Bar3.Height = _rng.Next(5, 15);
+        Bar4.Height = _rng.Next(4, 12);
     }
 }
