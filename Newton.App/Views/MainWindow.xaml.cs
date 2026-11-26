@@ -18,6 +18,7 @@ public sealed partial class MainWindow : Window
     private readonly MainNewtonndViewModel _viewModel;
     private readonly ISettingsService _settingsService;
     private readonly NewtonndWindowHelper _windowHelper;
+    private VolumePillWindow? _volumePillWindow;
 
     private readonly Visual _containerVisual;
     private readonly Compositor _compositor;
@@ -75,10 +76,34 @@ public sealed partial class MainWindow : Window
         if (e.PropertyName is nameof(MainNewtonndViewModel.VisualState) or nameof(MainNewtonndViewModel.PrimaryActivity))
         {
             ApplyWindowBounds(animate: true);
+            if (_viewModel.VisualState != NewtonndVisualState.Expanded && _viewModel.IsVolumeBarOpen)
+            {
+                _viewModel.IsVolumeBarOpen = false;
+            }
             if (e.PropertyName == nameof(MainNewtonndViewModel.VisualState))
             {
                 PlaySpringContentTransition();
             }
+        }
+        else if (e.PropertyName == nameof(MainNewtonndViewModel.IsVolumeBarOpen))
+        {
+            UpdateVolumePillWindow();
+        }
+    }
+
+    private void UpdateVolumePillWindow()
+    {
+        if (_viewModel.IsVolumeBarOpen && _viewModel.VisualState == NewtonndVisualState.Expanded)
+        {
+            _volumePillWindow ??= new VolumePillWindow();
+            var (_, h, _) = GetExpandedDimensions();
+            _volumePillWindow.PositionBelowMainPill(_settingsService.Current.VerticalOffset + h, _settingsService);
+            _volumePillWindow.Activate();
+        }
+        else
+        {
+            _volumePillWindow?.Close();
+            _volumePillWindow = null;
         }
     }
 
@@ -264,6 +289,11 @@ public sealed partial class MainWindow : Window
     {
         if (args.WindowActivationState == WindowActivationState.Deactivated)
         {
+            if (_volumePillWindow is not null && _viewModel.IsVolumeBarOpen)
+            {
+                _windowHelper.EnsureTopMost();
+                return;
+            }
             if (_settingsService.Current.ClickOutsideToCollapse &&
                 _viewModel.VisualState != NewtonndVisualState.Compact)
             {
