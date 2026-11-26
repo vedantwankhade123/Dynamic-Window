@@ -7,6 +7,7 @@
 
     <UserControl.Resources>
         <conv:TimeSpanFormatConverter x:Key="TimeFmt" />
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
     <Grid Padding="18,16,18,14" RowSpacing="12">
@@ -24,16 +25,25 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Width="48" Height="48" CornerRadius="12">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#F472B6" Offset="0" />
-                        <GradientStop Color="#818CF8" Offset="0.55" />
-                        <GradientStop Color="#FB923C" Offset="1" />
-                    </LinearGradientBrush>
-                </Border.Background>
-                <ic:SymbolIcon Symbol="MusicNote2" FontSize="20" Foreground="#FFFFFF" />
-            </Border>
+            <Grid Grid.Column="0" Width="48" Height="48">
+                <Border
+                    CornerRadius="11"
+                    Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#F472B6" Offset="0" />
+                            <GradientStop Color="#818CF8" Offset="0.55" />
+                            <GradientStop Color="#FB923C" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <ic:SymbolIcon Symbol="MusicNote2" FontSize="20" Foreground="#FFFFFF" />
+                </Border>
+                <Border
+                    CornerRadius="11"
+                    Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}}">
+                    <Image Source="{Binding CurrentTrack.ArtworkPath}" Stretch="UniformToFill" />
+                </Border>
+            </Grid>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
                 <TextBlock

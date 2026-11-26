@@ -1,8 +1,11 @@
+using System.Security.Cryptography;
+using System.Text;
 using Newton.Core.Interfaces;
 using Newton.Core.Models;
 using Newton.Core.Services;
 using Microsoft.Extensions.Logging;
 using Windows.Media.Control;
+using Windows.Storage.Streams;
 
 namespace Newton.Windows.Media;
 
@@ -107,6 +110,7 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
             var source = FormatAppName(session.SourceAppUserModelId);
             var duration = timeline.EndTime > timeline.StartTime ? timeline.EndTime - timeline.StartTime : TimeSpan.Zero;
             var position = timeline.Position >= timeline.StartTime ? timeline.Position - timeline.StartTime : TimeSpan.Zero;
+            var artworkPath = await SaveThumbnailAsync(props.Thumbnail, props.Title, props.Artist);
 
             CurrentTrack = new MusicTrack
             {
@@ -117,6 +121,7 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
                 Position = position,
                 IsPlaying = isPlaying,
                 SourceApp = source,
+                ArtworkPath = artworkPath,
                 IsSimulated = false
             };
 
@@ -166,6 +171,7 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
             Subtitle = $"{CurrentTrack.Artist} • {CurrentTrack.SourceApp}",
             IconGlyph = "\uE8D6",
             AccentHex = "#60A5FA",
+            ImageUri = CurrentTrack.ArtworkPath,
             Progress = progress,
             Status = CurrentTrack.IsPlaying ? ActivityStatus.Active : ActivityStatus.Paused,
             Priority = ActivityPriority.Normal,
@@ -177,6 +183,31 @@ public sealed class WindowsMediaService : IMusicService, IDisposable
                 new("music-next", "Next", "\uE893")
             }
         });
+    }
+
+    private static async Task<string?> SaveThumbnailAsync(IRandomAccessStreamReference? thumbRef, string? title, string? artist)
+    {
+        if (thumbRef is null) return null;
+        try
+        {
+            using var stream = await thumbRef.OpenReadAsync();
+            if (stream.Size == 0) return null;
+
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Newton", "Cache");
+            Directory.CreateDirectory(dir);
+
+            var key = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{title}|{artist}")))[..12];
+            var path = Path.Combine(dir, $"art_{key}.img");
+
+            using var readStream = stream.AsStreamForRead();
+            using var fileStream = File.Create(path);
+            await readStream.CopyToAsync(fileStream);
+            return path;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string FormatAppName(string? appId)

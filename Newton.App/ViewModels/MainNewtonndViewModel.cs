@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FluentIcons.Common;
 using Newton.Core.Interfaces;
 using Newton.Core.Models;
 using Newton.Core.Services;
@@ -74,6 +75,22 @@ public partial class MainNewtonndViewModel : ObservableObject
     public string CompactSubtitle => PrimaryActivity?.Subtitle ?? "Ready";
     public double CompactProgress => PrimaryActivity?.Progress ?? 0;
     public bool HasCompactProgress => Settings.ShowProgressInCompact && PrimaryActivity?.Progress is not null;
+    public string? CompactArtworkPath => PrimaryActivity?.ImageUri ?? CurrentTrack?.ArtworkPath;
+    public bool HasCompactArtwork => !string.IsNullOrEmpty(CompactArtworkPath);
+    public bool HasTrackArtwork => !string.IsNullOrEmpty(CurrentTrack?.ArtworkPath);
+
+    public Symbol CompactSymbol => PrimaryActivity?.Type switch
+    {
+        ActivityType.Music => Symbol.MusicNote2,
+        ActivityType.Timer or ActivityType.Pomodoro => Symbol.Timer,
+        ActivityType.LowBattery => Symbol.BatteryWarning,
+        ActivityType.ScreenRecording => Symbol.Record,
+        ActivityType.FocusAssist => Symbol.WeatherMoon,
+        ActivityType.BluetoothAccessory => Symbol.Headphones,
+        ActivityType.IncomingCall => Symbol.Call,
+        ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall => Symbol.ArrowDownload,
+        _ => Symbol.Sparkle
+    };
 
     public MainNewtonndViewModel(
         IActivityService activityService,
@@ -110,6 +127,9 @@ public partial class MainNewtonndViewModel : ObservableObject
         {
             CurrentTrack = track;
             OnPropertyChanged(nameof(CurrentTrack));
+            OnPropertyChanged(nameof(HasTrackArtwork));
+            OnPropertyChanged(nameof(CompactArtworkPath));
+            OnPropertyChanged(nameof(HasCompactArtwork));
         });
         _notificationService.NotificationsChanged += (_, _) => RunOnUi(RefreshNotifications);
         _systemMonitorService.StatsUpdated += (_, stats) => RunOnUi(() =>
@@ -167,6 +187,10 @@ public partial class MainNewtonndViewModel : ObservableObject
         OnPropertyChanged(nameof(CompactSubtitle));
         OnPropertyChanged(nameof(CompactProgress));
         OnPropertyChanged(nameof(HasCompactProgress));
+        OnPropertyChanged(nameof(CompactArtworkPath));
+        OnPropertyChanged(nameof(HasCompactArtwork));
+        OnPropertyChanged(nameof(HasTrackArtwork));
+        OnPropertyChanged(nameof(CompactSymbol));
     }
 
     private void InitializeQuickControls()

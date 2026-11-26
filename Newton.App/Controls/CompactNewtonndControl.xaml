@@ -17,24 +17,24 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Compact Pill Badge -->
-        <Border
-            Grid.Column="0"
-            Width="26"
-            Height="26"
-            CornerRadius="13"
-            VerticalAlignment="Center">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#27272A" Offset="0" />
-                    <GradientStop Color="#18181B" Offset="1" />
-                </LinearGradientBrush>
-            </Border.Background>
-            <ic:SymbolIcon
-                Symbol="Sparkle"
-                FontSize="14"
-                Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}, FallbackValue='#60A5FA'}" />
-        </Border>
+        <!-- Left Compact Pill Badge: Real Artwork or Content-Specific Icon -->
+        <Grid Grid.Column="0" Width="26" Height="26" VerticalAlignment="Center">
+            <Border
+                CornerRadius="7"
+                Background="#1A1A20"
+                Visibility="{Binding HasCompactArtwork, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                <ic:SymbolIcon
+                    Symbol="{Binding CompactSymbol}"
+                    FontSize="14"
+                    Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}, FallbackValue='#60A5FA'}" />
+            </Border>
+
+            <Border
+                CornerRadius="7"
+                Visibility="{Binding HasCompactArtwork, Converter={StaticResource BoolToVis}}">
+                <Image Source="{Binding CompactArtworkPath}" Stretch="UniformToFill" />
+            </Border>
+        </Grid>
 
         <!-- Center Title & Subtitle -->
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="-1">
