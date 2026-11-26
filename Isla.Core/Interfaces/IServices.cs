@@ -48,7 +48,6 @@ public interface ISystemMonitorService
 {
     SystemStats CurrentStats { get; }
     event EventHandler<SystemStats>? StatsUpdated;
-    void TriggerSpike();
 }
 
 public interface IAiService
@@ -70,27 +69,4 @@ public interface ISettingsService
     Task LoadAsync();
     Task SaveAsync(IslaSettings settings);
     Task ResetToDefaultsAsync();
-}
-
-public interface IDemoController
-{
-    bool IsDemoMode { get; }
-    void StartMusicDemo();
-    void ToggleMusicDemo();
-    void StartDownloadDemo();
-    void StartTimerDemo(int seconds = 90);
-    void CompleteTimerDemo();
-    void StartPomodoroDemo();
-    void StartAiTaskDemo();
-    void StartFileOperationDemo();
-    void StartAppInstallDemo();
-    void StartCustomDevDemo();
-    void StartScreenRecordingDemo();
-    void StartFocusAssistDemo();
-    void StartLowBatteryDemo();
-    void StartBluetoothDemo();
-    void StartIncomingCallDemo();
-    void SimulateNotification(string kind = "message");
-    void TriggerSystemSpike();
-    void ResetDemoData();
 }

@@ -1,5 +1,6 @@
 using Isla.Core.Interfaces;
 using Isla.Core.Services;
+using Isla.Infrastructure.AI;
 using Isla.Infrastructure.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,14 +20,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ActivityManager>();
         services.AddSingleton<IActivityService>(sp => sp.GetRequiredService<ActivityManager>());
 
-        services.AddSingleton<MockDemoService>();
-        services.AddSingleton<IMusicService>(sp => sp.GetRequiredService<MockDemoService>());
-        services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<MockDemoService>());
-        services.AddSingleton<ISystemMonitorService>(sp => sp.GetRequiredService<MockDemoService>());
-        services.AddSingleton<IAiService>(sp => sp.GetRequiredService<MockDemoService>());
-        services.AddSingleton<IDemoController>(sp => sp.GetRequiredService<MockDemoService>());
+        services.AddSingleton<RealTimerAndNotificationService>();
+        services.AddSingleton<ITimerService>(sp => sp.GetRequiredService<RealTimerAndNotificationService>());
+        services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<RealTimerAndNotificationService>());
 
         services.AddSingleton<ISettingsService, SqliteSettingsService>();
+        services.AddSingleton<IAiService, LocalAiService>();
 
         return services;
     }
