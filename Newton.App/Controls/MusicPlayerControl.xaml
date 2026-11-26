@@ -10,157 +10,166 @@
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
-    <Grid Padding="18,16,18,14" RowSpacing="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Grid>
+        <!-- Ambient Music-Synced Gradient Layer -->
+        <Border CornerRadius="22">
+            <Border.Background>
+                <LinearGradientBrush x:Name="AmbientBrush" StartPoint="0.5,0" EndPoint="0.5,1">
+                    <GradientStop Color="#000000" Offset="0.0" />
+                    <GradientStop Color="#09090B" Offset="0.32" />
+                    <GradientStop x:Name="GlowStop" Color="#887F1D1D" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
 
-        <!-- Row 0: Album Art + Track/Artist + Platform Logo + 9-Bar Smooth Waveform -->
-        <Grid Grid.Row="0" ColumnSpacing="12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <Grid Padding="18,16,18,14" RowSpacing="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <Grid Grid.Column="0" Width="48" Height="48">
+            <!-- Row 0: Circular Album Art + Track/Artist + Platform Badge -->
+            <Grid Grid.Row="0" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" Width="46" Height="46">
+                    <Border
+                        CornerRadius="23"
+                        Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#F472B6" Offset="0" />
+                                <GradientStop Color="#818CF8" Offset="0.55" />
+                                <GradientStop Color="#FB923C" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <ic:SymbolIcon Symbol="MusicNote2" FontSize="20" Foreground="#FFFFFF" />
+                    </Border>
+                    <Border
+                        CornerRadius="23"
+                        Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}}">
+                        <Image Source="{Binding CurrentTrack.ArtworkPath}" Stretch="UniformToFill" />
+                    </Border>
+                </Grid>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Title}"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        Foreground="#FFFFFF"
+                        TextTrimming="CharacterEllipsis"
+                        MaxLines="1" />
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Artist}"
+                        FontSize="12.5"
+                        Foreground="#B4B4BC"
+                        TextTrimming="CharacterEllipsis"
+                        MaxLines="1" />
+                </StackPanel>
+
+                <!-- Top-Right Platform Logo Circle -->
                 <Border
-                    CornerRadius="11"
-                    Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#F472B6" Offset="0" />
-                            <GradientStop Color="#818CF8" Offset="0.55" />
-                            <GradientStop Color="#FB923C" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <ic:SymbolIcon Symbol="MusicNote2" FontSize="20" Foreground="#FFFFFF" />
-                </Border>
-                <Border
-                    CornerRadius="11"
-                    Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}}">
-                    <Image Source="{Binding CurrentTrack.ArtworkPath}" Stretch="UniformToFill" />
+                    Grid.Column="2"
+                    Width="28" Height="28" CornerRadius="14"
+                    Background="#1FFFFFFF"
+                    BorderBrush="#28FFFFFF"
+                    BorderThickness="1"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding HasPlatformIcon, Converter={StaticResource BoolToVis}}"
+                    ToolTipService.ToolTip="{Binding PlatformLabel}">
+                    <Image Source="{Binding PlatformIconPath}" Width="16" Height="16" Stretch="Uniform" />
                 </Border>
             </Grid>
 
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                <TextBlock
-                    Text="{Binding CurrentTrack.Title}"
-                    FontSize="14.5"
-                    FontWeight="SemiBold"
+            <!-- Row 1: Scrubber Bar + Timestamps -->
+            <Grid Grid.Row="1" RowSpacing="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ProgressBar
+                    Grid.Row="0"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="{Binding PrimaryActivity.Progress, FallbackValue=0}"
+                    Height="4"
+                    CornerRadius="2"
                     Foreground="#FFFFFF"
-                    TextTrimming="CharacterEllipsis"
-                    MaxLines="1" />
-                <TextBlock
-                    Text="{Binding CurrentTrack.Artist}"
-                    FontSize="12.5"
-                    Foreground="#9CA3AF"
-                    TextTrimming="CharacterEllipsis"
-                    MaxLines="1" />
-            </StackPanel>
+                    Background="#38FFFFFF" />
+                <Grid Grid.Row="1">
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Position, Converter={StaticResource TimeFmt}}"
+                        FontSize="10.5"
+                        Foreground="#9CA3AF"
+                        HorizontalAlignment="Left" />
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Duration, Converter={StaticResource TimeFmt}}"
+                        FontSize="10.5"
+                        Foreground="#9CA3AF"
+                        HorizontalAlignment="Right" />
+                </Grid>
+            </Grid>
 
-            <!-- Platform Logo + 9-Bar Dynamic Island Waveform -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <Border
-                    Width="20" Height="20" CornerRadius="5"
-                    Visibility="{Binding HasPlatformIcon, Converter={StaticResource BoolToVis}}"
-                    ToolTipService.ToolTip="{Binding PlatformLabel}">
-                    <Image Source="{Binding PlatformIconPath}" Stretch="Uniform" />
-                </Border>
-                <StackPanel x:Name="MusicWave" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                    <Rectangle x:Name="W1" Width="2.5" Height="6" RadiusX="1.2" RadiusY="1.2" Fill="#FB7185" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W2" Width="2.5" Height="11" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W3" Width="2.5" Height="16" RadiusX="1.2" RadiusY="1.2" Fill="#C084FC" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W4" Width="2.5" Height="19" RadiusX="1.2" RadiusY="1.2" Fill="#A78BFA" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W5" Width="2.5" Height="22" RadiusX="1.2" RadiusY="1.2" Fill="#818CF8" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W6" Width="2.5" Height="17" RadiusX="1.2" RadiusY="1.2" Fill="#60A5FA" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W7" Width="2.5" Height="13" RadiusX="1.2" RadiusY="1.2" Fill="#38BDF8" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W8" Width="2.5" Height="9" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" VerticalAlignment="Center" />
-                    <Rectangle x:Name="W9" Width="2.5" Height="5" RadiusX="1.2" RadiusY="1.2" Fill="#FB923C" VerticalAlignment="Center" />
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-
-        <!-- Row 1: Scrubber Bar + Timestamps -->
-        <Grid Grid.Row="1" ColumnSpacing="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBlock
-                Grid.Column="0"
-                Text="{Binding CurrentTrack.Position, Converter={StaticResource TimeFmt}}"
-                FontSize="10.5"
-                Foreground="#8E8E93"
-                VerticalAlignment="Center" />
-            <ProgressBar
-                Grid.Column="1"
-                Minimum="0"
-                Maximum="100"
-                Value="{Binding PrimaryActivity.Progress, FallbackValue=0}"
-                Height="4"
-                CornerRadius="2"
-                Foreground="#FFFFFF"
-                Background="#2C2C2E"
-                VerticalAlignment="Center" />
-            <TextBlock
-                Grid.Column="2"
-                Text="{Binding CurrentTrack.Duration, Converter={StaticResource TimeFmt}}"
-                FontSize="10.5"
-                Foreground="#8E8E93"
-                VerticalAlignment="Center" />
-        </Grid>
-
-        <!-- Row 2: Transport Controls + Volume -->
-        <Grid Grid.Row="2">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
-                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
-                    <ic:SymbolIcon Symbol="Previous" FontSize="18" />
+            <!-- Row 2: Centered Large White Play/Pause + Transport Controls -->
+            <Grid Grid.Row="2">
+                <Button HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" Padding="6" Foreground="#D1D5DB" Command="{Binding SeekBack10Command}" ToolTipService.ToolTip="-10s">
+                    <ic:SymbolIcon Symbol="Rewind" FontSize="16" />
                 </Button>
-                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
-                    <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="22" />
-                </Button>
-                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
-                    <ic:SymbolIcon Symbol="Next" FontSize="18" />
-                </Button>
-            </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="2" Visibility="{Binding IsVolumeBarOpen, Converter={StaticResource BoolToVis}}">
-                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeDownCommand}" ToolTipService.ToolTip="Volume Down">
-                        <ic:SymbolIcon Symbol="Subtract" FontSize="11" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" VerticalAlignment="Center">
+                    <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
+                        <ic:SymbolIcon Symbol="Previous" FontSize="20" />
                     </Button>
-                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding ToggleMuteCommand}" ToolTipService.ToolTip="Mute / Unmute">
-                        <ic:SymbolIcon Symbol="SpeakerMute" FontSize="11" />
+                    <Button
+                        Width="44" Height="44" CornerRadius="22" Padding="0"
+                        Background="#FFFFFF" Foreground="#000000" BorderThickness="0"
+                        Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
+                        <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="20" />
                     </Button>
-                    <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="#1E1E24" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeUpCommand}" ToolTipService.ToolTip="Volume Up">
-                        <ic:SymbolIcon Symbol="Add" FontSize="11" />
+                    <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
+                        <ic:SymbolIcon Symbol="Next" FontSize="20" />
                     </Button>
                 </StackPanel>
 
-                <Button Background="Transparent" BorderThickness="0" Padding="4" Foreground="#9CA3AF" Command="{Binding ToggleVolumeBarCommand}" ToolTipService.ToolTip="Volume Controls">
-                    <ic:SymbolIcon Symbol="{Binding SpeakerSymbol}" FontSize="16" />
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" Padding="6" Foreground="#D1D5DB" Command="{Binding SeekForward10Command}" ToolTipService.ToolTip="+10s">
+                    <ic:SymbolIcon Symbol="FastForward" FontSize="16" />
                 </Button>
-            </StackPanel>
-        </Grid>
+            </Grid>
 
-        <!-- Row 3: Vertical Expansion Extra Options -->
-        <Grid Grid.Row="3" Padding="0,4,0,0">
-            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Left">
-                <Button Content="-10s" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding SeekBack10Command}" />
-                <Button Content="+10s" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding SeekForward10Command}" />
-                <Button Content="5m Timer" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding StartTimer5MinCommand}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                <Button Content="Dashboard" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="11" Command="{Binding OpenDashboardCommand}" />
-                <Button Style="{StaticResource NewtonIconButtonStyle}" Width="24" Height="24" CornerRadius="12" Command="{Binding CollapseCommand}" ToolTipService.ToolTip="Collapse">
-                    <ic:SymbolIcon Symbol="ChevronUp" FontSize="11" />
-                </Button>
-            </StackPanel>
+            <!-- Row 3: Quick Volume & Utility Strip -->
+            <Grid Grid.Row="3">
+                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Button Background="Transparent" BorderThickness="0" Padding="4" Foreground="#D1D5DB" Command="{Binding ToggleVolumeBarCommand}" ToolTipService.ToolTip="Volume Controls">
+                        <ic:SymbolIcon Symbol="{Binding SpeakerSymbol}" FontSize="15" />
+                    </Button>
+                    <StackPanel Orientation="Horizontal" Spacing="2" Visibility="{Binding IsVolumeBarOpen, Converter={StaticResource BoolToVis}}">
+                        <Button Width="22" Height="22" CornerRadius="11" Padding="0" Background="#26FFFFFF" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeDownCommand}">
+                            <ic:SymbolIcon Symbol="Subtract" FontSize="10" />
+                        </Button>
+                        <Button Width="22" Height="22" CornerRadius="11" Padding="0" Background="#26FFFFFF" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding ToggleMuteCommand}">
+                            <ic:SymbolIcon Symbol="SpeakerMute" FontSize="10" />
+                        </Button>
+                        <Button Width="22" Height="22" CornerRadius="11" Padding="0" Background="#26FFFFFF" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding VolumeUpCommand}">
+                            <ic:SymbolIcon Symbol="Add" FontSize="10" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="5m Timer" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="10.5" Command="{Binding StartTimer5MinCommand}" />
+                    <Button Content="Dashboard" Style="{StaticResource NewtonPillButtonStyle}" Padding="9,3" FontSize="10.5" Command="{Binding OpenDashboardCommand}" />
+                    <Button Style="{StaticResource NewtonIconButtonStyle}" Width="24" Height="24" CornerRadius="12" Command="{Binding CollapseCommand}" ToolTipService.ToolTip="Collapse">
+                        <ic:SymbolIcon Symbol="ChevronUp" FontSize="11" />
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
