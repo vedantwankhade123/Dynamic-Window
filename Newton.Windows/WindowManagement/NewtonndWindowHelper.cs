@@ -1,19 +1,21 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Newton.Core.Models;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Newton.Core.Models;
 using Windows.Graphics;
 using WinRT.Interop;
 
 namespace Newton.Windows.WindowManagement;
 
-public sealed class NewtonndWindowHelper
+public sealed class NewtonndWindowHelper : IDisposable
 {
     private readonly Window _window;
     private readonly IntPtr _hwnd;
     private readonly AppWindow _appWindow;
+    private SubclassProc? _subclassDelegate;
+
+    public event Action? GlobalHotKeyPressed;
 
     public NewtonndWindowHelper(Window window)
     {
@@ -37,9 +39,8 @@ public sealed class NewtonndWindowHelper
             presenter.SetBorderAndTitleBar(false, false);
         }
 
-        try { _appWindow.IsShownInSwitchers = false; } catch { /* Not implemented in unpackaged mode; WS_EX_TOOLWINDOW handles this */ }
+        try { _appWindow.IsShownInSwitchers = false; } catch { }
 
-        // Remove standard window border styles for crisp floating pill rendering
         var style = GetWindowLongPtr(_hwnd, GWL_STYLE).ToInt64();
         style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
         SetWindowLongPtr(_hwnd, GWL_STYLE, new IntPtr(style));
@@ -48,13 +49,31 @@ public sealed class NewtonndWindowHelper
         exStyle |= WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
         SetWindowLongPtr(_hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
 
-        // Completely disable Windows 11 DWM border & non-client rendering so no squarish outline appears
         int noBorder = unchecked((int)0xFFFFFFFE); // DWMWA_COLOR_NONE
         DwmSetWindowAttribute(_hwnd, DWMWA_BORDER_COLOR, ref noBorder, sizeof(int));
         int ncrpDisabled = 1; // DWMNCRP_DISABLED
         DwmSetWindowAttribute(_hwnd, DWMWA_NCRENDERING_POLICY, ref ncrpDisabled, sizeof(int));
 
+        RegisterCtrlNHotKey();
         EnsureTopMost();
+    }
+
+    private void RegisterCtrlNHotKey()
+    {
+        _subclassDelegate = OnWindowSubclass;
+        SetWindowSubclass(_hwnd, _subclassDelegate, new UIntPtr(1), IntPtr.Zero);
+        // Ctrl + N (0x4E)
+        RegisterHotKey(_hwnd, HOTKEY_TOGGLE_ID, MOD_CONTROL | MOD_NOREPEAT, 0x4E);
+    }
+
+    private IntPtr OnWindowSubclass(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam, UIntPtr uIdSubclass, IntPtr dwRefData)
+    {
+        if (uMsg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_TOGGLE_ID)
+        {
+            GlobalHotKeyPressed?.Invoke();
+            return IntPtr.Zero;
+        }
+        return DefSubclassProc(hWnd, uMsg, wParam, lParam);
     }
 
     public void EnsureTopMost()
@@ -72,19 +91,7 @@ public sealed class NewtonndWindowHelper
         return dpi > 0 ? dpi / 96.0 : 1.0;
     }
 
-    public IReadOnlyList<string> GetMonitorNames()
-    {
-        var displays = DisplayArea.FindAll();
-        var list = new List<string>(displays.Count);
-        for (int i = 0; i < displays.Count; i++)
-        {
-            var d = displays[i];
-            list.Add($"Display {i + 1} ({d.OuterBounds.Width}×{d.OuterBounds.Height}){(d.IsPrimary ? " • Primary" : "")}");
-        }
-        return list;
-    }
-
-    public void UpdateBounds(double dipWidth, double dipHeight, double cornerRadiusDip, NewtonSettings settings, bool dodgeBrowser = false)
+    public void UpdateBounds(double dipWidth, double dipHeight, double cornerRadiusDip, NewtonSettings settings)
     {
         var scale = GetDpiScale();
         int pixelWidth = Math.Max(100, (int)Math.Round(dipWidth * scale));
@@ -101,22 +108,12 @@ public sealed class NewtonndWindowHelper
         int offsetX = (int)Math.Round(settings.HorizontalOffset * scale);
         int offsetY = (int)Math.Round(settings.VerticalOffset * scale);
 
-        int x;
-        if (dodgeBrowser && settings.PositionMode == NewtonPositionMode.TopCenter)
+        int x = settings.PositionMode switch
         {
-            // Slide into the empty titlebar area to the left of window Min/Max/Close buttons
-            x = bounds.X + bounds.Width - pixelWidth - (int)(175 * scale);
-        }
-        else
-        {
-            x = settings.PositionMode switch
-            {
-                NewtonPositionMode.TopLeft => bounds.X + (int)(20 * scale) + offsetX,
-                NewtonPositionMode.TopRight => bounds.X + bounds.Width - pixelWidth - (int)(20 * scale) + offsetX,
-                NewtonPositionMode.Custom => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX,
-                _ => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX
-            };
-        }
+            NewtonPositionMode.TopLeft => bounds.X + (int)(20 * scale) + offsetX,
+            NewtonPositionMode.TopRight => bounds.X + bounds.Width - pixelWidth - (int)(20 * scale) + offsetX,
+            _ => bounds.X + (bounds.Width - pixelWidth) / 2 + offsetX
+        };
 
         int y = targetDisplay.OuterBounds.Y + offsetY;
 
@@ -126,6 +123,29 @@ public sealed class NewtonndWindowHelper
         var rgn = CreateRoundRectRgn(0, 0, pixelWidth + 1, pixelHeight + 1, cornerPx, cornerPx);
         SetWindowRgn(_hwnd, rgn, true);
         EnsureTopMost();
+    }
+
+    public bool IsCursorAtTopCenterEdge(NewtonSettings settings)
+    {
+        if (!GetCursorPos(out var pt)) return false;
+
+        var displays = DisplayArea.FindAll();
+        DisplayArea targetDisplay = DisplayArea.Primary;
+        if (settings.SelectedMonitorIndex >= 0 && settings.SelectedMonitorIndex < displays.Count)
+        {
+            targetDisplay = displays[settings.SelectedMonitorIndex];
+        }
+
+        var scale = GetDpiScale();
+        var outer = targetDisplay.OuterBounds;
+        int centerX = outer.X + outer.Width / 2;
+        int halfZone = (int)(160 * scale);
+        int edgePx = (int)(4 * scale);
+
+        return pt.Y <= outer.Y + edgePx &&
+               pt.Y >= outer.Y &&
+               pt.X >= centerX - halfZone &&
+               pt.X <= centerX + halfZone;
     }
 
     public void BeginDrag()
@@ -144,26 +164,12 @@ public sealed class NewtonndWindowHelper
 
     public static bool IsAltKeyDown() => (GetAsyncKeyState(0x12) & 0x8000) != 0;
 
-    public static bool IsBrowserAtTop()
+    public void Dispose()
     {
-        try
+        UnregisterHotKey(_hwnd, HOTKEY_TOGGLE_ID);
+        if (_subclassDelegate is not null)
         {
-            var fg = GetForegroundWindow();
-            if (fg == IntPtr.Zero) return false;
-
-            GetWindowThreadProcessId(fg, out uint pid);
-            if (pid == 0 || pid == Environment.ProcessId) return false;
-
-            using var proc = Process.GetProcessById((int)pid);
-            var name = proc.ProcessName.ToLowerInvariant();
-            if (name is not ("chrome" or "msedge" or "brave" or "firefox" or "opera" or "vivaldi" or "arc"))
-                return false;
-
-            return GetWindowRect(fg, out var r) && r.Top <= 24;
-        }
-        catch
-        {
-            return false;
+            RemoveWindowSubclass(_hwnd, _subclassDelegate, new UIntPtr(1));
         }
     }
 
@@ -178,13 +184,22 @@ public sealed class NewtonndWindowHelper
     private const long WS_EX_TOPMOST = 0x00000008L;
     private const long WS_EX_TRANSPARENT = 0x00000020L;
     private const int WM_NCLBUTTONDOWN = 0x00A1;
+    private const int WM_HOTKEY = 0x0312;
     private const int HTCAPTION = 2;
+    private const int HOTKEY_TOGGLE_ID = 1001;
+    private const uint MOD_CONTROL = 0x0002;
+    private const uint MOD_NOREPEAT = 0x4000;
     private static readonly IntPtr HWND_TOPMOST = new(-1);
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOACTIVATE = 0x0010;
     private const int DWMWA_NCRENDERING_POLICY = 2;
     private const int DWMWA_BORDER_COLOR = 34;
+
+    private delegate IntPtr SubclassProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam, UIntPtr uIdSubclass, IntPtr dwRefData);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT { public int X, Y; }
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -217,14 +232,20 @@ public sealed class NewtonndWindowHelper
     private static extern short GetAsyncKeyState(int vKey);
 
     [DllImport("user32.dll")]
-    private static extern IntPtr GetForegroundWindow();
+    private static extern bool GetCursorPos(out POINT lpPoint);
 
     [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
     [DllImport("user32.dll")]
-    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct RECT { public int Left, Top, Right, Bottom; }
+    [DllImport("comctl32.dll")]
+    private static extern bool SetWindowSubclass(IntPtr hWnd, SubclassProc pfnSubclass, UIntPtr uIdSubclass, IntPtr dwRefData);
+
+    [DllImport("comctl32.dll")]
+    private static extern bool RemoveWindowSubclass(IntPtr hWnd, SubclassProc pfnSubclass, UIntPtr uIdSubclass);
+
+    [DllImport("comctl32.dll")]
+    private static extern IntPtr DefSubclassProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
 }

@@ -23,9 +23,10 @@ public sealed partial class MainWindow : Window
     private readonly Compositor _compositor;
     private readonly DispatcherTimer _morphTimer;
     private readonly DispatcherTimer _hoverExitTimer;
-    private readonly DispatcherTimer _dodgeTimer;
+    private readonly DispatcherTimer _edgeTimer;
     private bool _isPointerInside;
-    private bool _isDodgingBrowser;
+    private bool _isUserHidden;
+    private bool _isEdgeRevealed;
     private bool _isGhostClickThrough;
 
     private double _curW = 216, _curH = 44, _curR = 22;
@@ -46,6 +47,7 @@ public sealed partial class MainWindow : Window
 
         _windowHelper = new NewtonndWindowHelper(this);
         _windowHelper.ConfigureAsFloatingNewtonnd();
+        _windowHelper.GlobalHotKeyPressed += OnGlobalHotKeyPressed;
 
         _containerVisual = ElementCompositionPreview.GetElementVisual(NewtonndContainer);
         _compositor = _containerVisual.Compositor;
@@ -67,9 +69,9 @@ public sealed partial class MainWindow : Window
             }
         };
 
-        _dodgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(180) };
-        _dodgeTimer.Tick += OnDodgeTick;
-        _dodgeTimer.Start();
+        _edgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
+        _edgeTimer.Tick += OnEdgeTimerTick;
+        _edgeTimer.Start();
 
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
         _settingsService.SettingsChanged += (_, _) => DispatcherQueue.TryEnqueue(() => ApplyWindowBounds(animate: true));
@@ -93,7 +95,8 @@ public sealed partial class MainWindow : Window
     private void ApplyWindowBounds(bool animate)
     {
         var s = _settingsService.Current;
-        if (!s.IsNewtonndEnabled)
+        bool shouldShow = (s.IsNewtonndEnabled && !_isUserHidden) || _isEdgeRevealed;
+        if (!shouldShow)
         {
             _windowHelper.AppWindow.Hide();
             return;
@@ -118,7 +121,7 @@ public sealed partial class MainWindow : Window
             _curH = _targetH = h;
             _curR = _targetR = r;
             NewtonndContainer.CornerRadius = new CornerRadius(r);
-            _windowHelper.UpdateBounds(w, h, r, s, _isDodgingBrowser);
+            _windowHelper.UpdateBounds(w, h, r, s);
             return;
         }
 
@@ -152,7 +155,7 @@ public sealed partial class MainWindow : Window
         _curR = _startR + (_targetR - _startR) * ease;
 
         NewtonndContainer.CornerRadius = new CornerRadius(_curR);
-        _windowHelper.UpdateBounds(_curW, _curH, _curR, _settingsService.Current, _isDodgingBrowser);
+        _windowHelper.UpdateBounds(_curW, _curH, _curR, _settingsService.Current);
 
         if (t >= 1.0)
         {
@@ -160,7 +163,17 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void OnDodgeTick(object? sender, object e)
+    private void OnGlobalHotKeyPressed()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            _isUserHidden = !_isUserHidden;
+            _isEdgeRevealed = false;
+            ApplyWindowBounds(animate: true);
+        });
+    }
+
+    private void OnEdgeTimerTick(object? sender, object e)
     {
         var s = _settingsService.Current;
 
@@ -173,14 +186,20 @@ public sealed partial class MainWindow : Window
             RootShell.Opacity = altDown ? 0.22 : Math.Clamp(s.NewtonndOpacity, 0.4, 1.0);
         }
 
-        // 2. Smart auto-dodge when a browser is at the top of the screen
-        bool shouldDodge = s.AutoDodgeBrowserTabs &&
-                           _viewModel.VisualState == NewtonndVisualState.Compact &&
-                           NewtonndWindowHelper.IsBrowserAtTop();
-        if (shouldDodge != _isDodgingBrowser)
+        // 2. Top-edge mouse reveal when pill is hidden
+        if (_isUserHidden || !s.IsNewtonndEnabled)
         {
-            _isDodgingBrowser = shouldDodge;
-            _windowHelper.UpdateBounds(_curW, _curH, _curR, s, _isDodgingBrowser);
+            bool atTopEdge = _windowHelper.IsCursorAtTopCenterEdge(s);
+            if (atTopEdge && !_isEdgeRevealed)
+            {
+                _isEdgeRevealed = true;
+                ApplyWindowBounds(animate: true);
+            }
+            else if (!atTopEdge && !_isPointerInside && _isEdgeRevealed && _viewModel.VisualState == NewtonndVisualState.Compact)
+            {
+                _isEdgeRevealed = false;
+                ApplyWindowBounds(animate: false);
+            }
         }
     }
 

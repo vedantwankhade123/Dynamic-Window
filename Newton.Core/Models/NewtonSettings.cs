@@ -52,7 +52,7 @@ public sealed class NewtonSettings
     public bool ClickToExpand { get; set; } = true;
     public bool DoubleClickForDashboard { get; set; } = true;
     public bool HoverToPeek { get; set; } = true;
-    public string ToggleShortcut { get; set; } = "Ctrl + Alt + I";
+    public string ToggleShortcut { get; set; } = "Ctrl + N";
     public int AutoCollapseSeconds { get; set; } = 0;
     public bool ClickOutsideToCollapse { get; set; } = true;
     public bool DragToReposition { get; set; } = false;
