@@ -1,0 +1,15 @@
+## .NET / WinUI 3
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.db
+*.db-shm
+*.db-wal
+TestResults/
+AppPackages/
+BundleArtifacts/
+*.appx
+*.msix
+*.cer

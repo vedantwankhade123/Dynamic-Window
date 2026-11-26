@@ -1,0 +1,65 @@
+<Window
+    x:Class="Isla.App.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Isla.App.Controls"
+    xmlns:conv="using:Isla.App.Converters">
+
+    <Grid
+        x:Name="RootShell"
+        Background="Transparent"
+        PointerPressed="OnRootPointerPressed"
+        DoubleTapped="OnRootDoubleTapped">
+        <Grid.Resources>
+            <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        </Grid.Resources>
+
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="Toggle Expand" Command="{Binding ToggleExpandCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE70D;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Open Dashboard" Command="{Binding OpenDashboardCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE80F;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem Text="Demo Controller..." Command="{Binding OpenDemoPanelCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE768;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Settings..." Command="{Binding OpenSettingsCommand}">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE713;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem Text="Exit Isla" Click="OnExitClick">
+                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE711;" /></MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </Grid.ContextFlyout>
+
+        <!-- Main Pill / Card Surface -->
+        <Border
+            x:Name="IslandContainer"
+            Background="{StaticResource IslaPillBackgroundBrush}"
+            BorderBrush="{StaticResource IslaBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="23">
+
+            <Grid>
+                <!-- Compact State -->
+                <controls:CompactIslandControl
+                    x:Name="CompactView"
+                    Visibility="{Binding IsCompact, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Expanded State -->
+                <controls:ExpandedIslandControl
+                    x:Name="ExpandedView"
+                    Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Dashboard State -->
+                <controls:DashboardControl
+                    x:Name="DashboardView"
+                    Visibility="{Binding IsDashboard, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

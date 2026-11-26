@@ -1,0 +1,139 @@
+<UserControl
+    x:Class="Isla.App.Controls.MusicPlayerControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="using:Isla.App.Converters">
+
+    <UserControl.Resources>
+        <conv:TimeSpanFormatConverter x:Key="TimeFmt" />
+    </UserControl.Resources>
+
+    <Grid Padding="18,16,18,14" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Row: Album Art + Track/Artist + Equalizer Waveform -->
+        <Grid Grid.Row="0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Width="48" Height="48" CornerRadius="12">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#F472B6" Offset="0" />
+                        <GradientStop Color="#818CF8" Offset="0.55" />
+                        <GradientStop Color="#FB923C" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <FontIcon Glyph="&#xE8D6;" FontSize="18" Foreground="#FFFFFF" />
+            </Border>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                <TextBlock
+                    Text="{Binding CurrentTrack.Title}"
+                    FontSize="14.5"
+                    FontWeight="SemiBold"
+                    Foreground="#FFFFFF"
+                    TextTrimming="CharacterEllipsis"
+                    MaxLines="1" />
+                <TextBlock
+                    Text="{Binding CurrentTrack.Artist}"
+                    FontSize="12.5"
+                    Foreground="#9CA3AF"
+                    TextTrimming="CharacterEllipsis"
+                    MaxLines="1" />
+            </StackPanel>
+
+            <!-- Reference-style colorful waveform bars -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2.5" VerticalAlignment="Center">
+                <Rectangle Width="2.5" Height="8" RadiusX="1.2" RadiusY="1.2" Fill="#FB7185" />
+                <Rectangle Width="2.5" Height="15" RadiusX="1.2" RadiusY="1.2" Fill="#A78BFA" />
+                <Rectangle Width="2.5" Height="11" RadiusX="1.2" RadiusY="1.2" Fill="#818CF8" />
+                <Rectangle Width="2.5" Height="17" RadiusX="1.2" RadiusY="1.2" Fill="#F472B6" />
+                <Rectangle Width="2.5" Height="9" RadiusX="1.2" RadiusY="1.2" Fill="#FB923C" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Middle Row: Scrubber Bar + Timestamps -->
+        <Grid Grid.Row="1" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="0"
+                Text="{Binding CurrentTrack.Position, Converter={StaticResource TimeFmt}}"
+                FontSize="10.5"
+                Foreground="#8E8E93"
+                VerticalAlignment="Center" />
+            <ProgressBar
+                Grid.Column="1"
+                Minimum="0"
+                Maximum="100"
+                Value="{Binding PrimaryActivity.Progress, FallbackValue=32}"
+                Height="4"
+                CornerRadius="2"
+                Foreground="#FFFFFF"
+                Background="#2C2C2E"
+                VerticalAlignment="Center" />
+            <TextBlock
+                Grid.Column="2"
+                Text="{Binding CurrentTrack.Duration, Converter={StaticResource TimeFmt}}"
+                FontSize="10.5"
+                Foreground="#8E8E93"
+                VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Bottom Row: Transport Controls + Audio Output Device -->
+        <Grid Grid.Row="2">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="22">
+                <Button
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="6"
+                    Foreground="#FFFFFF"
+                    Command="{Binding PreviousTrackCommand}"
+                    ToolTipService.ToolTip="Previous">
+                    <FontIcon Glyph="&#xE892;" FontSize="17" />
+                </Button>
+                <Button
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="6"
+                    Foreground="#FFFFFF"
+                    Command="{Binding TogglePlayPauseCommand}"
+                    ToolTipService.ToolTip="Play / Pause">
+                    <FontIcon Glyph="&#xE769;" FontSize="20" />
+                </Button>
+                <Button
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="6"
+                    Foreground="#FFFFFF"
+                    Command="{Binding NextTrackCommand}"
+                    ToolTipService.ToolTip="Next">
+                    <FontIcon Glyph="&#xE893;" FontSize="17" />
+                </Button>
+            </StackPanel>
+
+            <Button
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Background="Transparent"
+                BorderThickness="0"
+                Padding="4"
+                Foreground="#9CA3AF"
+                Command="{Binding OpenDashboardCommand}"
+                ToolTipService.ToolTip="Windows Audio / Dashboard">
+                <FontIcon Glyph="&#xE7F5;" FontSize="15" />
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>
