@@ -1,0 +1,137 @@
+<UserControl
+    x:Class="DynamicWindow.App.Controls.MusicPlayerControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ic="using:FluentIcons.WinUI"
+    xmlns:conv="using:DynamicWindow.App.Converters">
+
+    <UserControl.Resources>
+        <conv:TimeSpanFormatConverter x:Key="TimeFmt" />
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
+    <Grid Background="#000000">
+        <Grid Padding="18,14,16,14" RowSpacing="11">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Row 0: Circular Album Art + Track/Artist + Speaker & Platform Badge on Top-Right -->
+            <Grid Grid.Row="0" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" Width="46" Height="46">
+                    <Border
+                        CornerRadius="23"
+                        Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#F472B6" Offset="0" />
+                                <GradientStop Color="#818CF8" Offset="0.55" />
+                                <GradientStop Color="#FB923C" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <ic:SymbolIcon Symbol="MusicNote2" FontSize="20" Foreground="#FFFFFF" />
+                    </Border>
+                    <Border
+                        CornerRadius="23"
+                        Visibility="{Binding HasTrackArtwork, Converter={StaticResource BoolToVis}}">
+                        <Image Source="{Binding CurrentTrack.ArtworkPath}" Stretch="UniformToFill" />
+                    </Border>
+                </Grid>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Title}"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        Foreground="#FFFFFF"
+                        TextTrimming="CharacterEllipsis"
+                        MaxLines="1" />
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Artist}"
+                        FontSize="12.5"
+                        Foreground="#B4B4BC"
+                        TextTrimming="CharacterEllipsis"
+                        MaxLines="1" />
+                </StackPanel>
+
+                <!-- Top-Right: Speaker Button + Platform Logo -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button
+                        Width="28" Height="28" CornerRadius="14" Padding="0"
+                        Background="#1FFFFFFF" BorderBrush="#28FFFFFF" BorderThickness="1"
+                        Foreground="#FFFFFF"
+                        Command="{Binding ToggleVolumeBarCommand}"
+                        ToolTipService.ToolTip="Volume Pill">
+                        <ic:SymbolIcon Symbol="{Binding SpeakerSymbol}" FontSize="14" />
+                    </Button>
+
+                    <Border
+                        Width="28" Height="28" CornerRadius="14"
+                        Background="#1FFFFFFF"
+                        BorderBrush="#28FFFFFF"
+                        BorderThickness="1"
+                        Visibility="{Binding HasPlatformIcon, Converter={StaticResource BoolToVis}}"
+                        ToolTipService.ToolTip="{Binding PlatformLabel}">
+                        <Image Source="{Binding PlatformIconPath}" Width="16" Height="16" Stretch="Uniform" />
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Row 1: Pure White Apple-Style Scrubber Bar + Pure White Timestamps -->
+            <Grid Grid.Row="1" RowSpacing="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid x:Name="ScrubberTrack" Grid.Row="0" Height="12" VerticalAlignment="Center">
+                    <!-- Background Track -->
+                    <Border Height="5" CornerRadius="2.5" Background="#3DFFFFFF" VerticalAlignment="Center" />
+                    <!-- Pure White Filled Progress -->
+                    <Border x:Name="ScrubberFill" Height="5" CornerRadius="2.5" Background="#FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Center" Width="0" />
+                    <!-- Pure White Circular Thumb -->
+                    <Ellipse x:Name="ScrubberThumb" Width="10" Height="10" Fill="#FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Position, Converter={StaticResource TimeFmt}}"
+                        FontSize="11"
+                        FontWeight="Medium"
+                        Foreground="#FFFFFF"
+                        HorizontalAlignment="Left" />
+                    <TextBlock
+                        Text="{Binding CurrentTrack.Duration, Converter={StaticResource TimeFmt}}"
+                        FontSize="11"
+                        FontWeight="Medium"
+                        Foreground="#FFFFFF"
+                        HorizontalAlignment="Right" />
+                </Grid>
+            </Grid>
+
+            <!-- Row 2: Clean Transport Controls Only (Previous, Play/Pause, Next) -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24" VerticalAlignment="Center">
+                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
+                    <ic:SymbolIcon Symbol="Previous" FontSize="20" />
+                </Button>
+                <Button
+                    Width="44" Height="44" CornerRadius="22" Padding="0"
+                    Background="#FFFFFF" Foreground="#000000" BorderThickness="0"
+                    Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
+                    <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="20" />
+                </Button>
+                <Button Background="Transparent" BorderThickness="0" Padding="6" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
+                    <ic:SymbolIcon Symbol="Next" FontSize="20" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
