@@ -22,8 +22,8 @@ public sealed partial class MainWindow : Window
     private readonly Visual _containerVisual;
     private readonly Compositor _compositor;
     private readonly DispatcherTimer _morphTimer;
-    private readonly DispatcherTimer _hoverExitTimer;
     private readonly DispatcherTimer _edgeTimer;
+    private DateTime _lastCursorInsideUtc = DateTime.MinValue;
     private bool _isPointerInside;
     private bool _isUserHidden;
     private bool _isEdgeRevealed;
@@ -59,17 +59,7 @@ public sealed partial class MainWindow : Window
         _morphTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
         _morphTimer.Tick += OnMorphTick;
 
-        _hoverExitTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(160) };
-        _hoverExitTimer.Tick += (_, _) =>
-        {
-            _hoverExitTimer.Stop();
-            if (!_isPointerInside && _viewModel.VisualState == NewtonndVisualState.HoverPeek)
-            {
-                _viewModel.VisualState = NewtonndVisualState.Compact;
-            }
-        };
-
-        _edgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
+        _edgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(60) };
         _edgeTimer.Tick += OnEdgeTimerTick;
         _edgeTimer.Start();
 
@@ -186,19 +176,22 @@ public sealed partial class MainWindow : Window
             RootShell.Opacity = altDown ? 0.22 : Math.Clamp(s.NewtonndOpacity, 0.4, 1.0);
         }
 
-        // 2. Reliable Win32 hover-expand across X axis (works even when unfocused)
+        // 2. Reliable Win32 hover-expand across X axis (single source of truth)
         bool cursorInside = _windowHelper.IsCursorInsideWindow();
         _isPointerInside = cursorInside;
-        if (s.HoverToPeek)
+        if (cursorInside)
         {
-            if (cursorInside && _viewModel.VisualState == NewtonndVisualState.Compact)
+            _lastCursorInsideUtc = DateTime.UtcNow;
+            if (s.HoverToPeek && _viewModel.VisualState == NewtonndVisualState.Compact)
             {
                 _viewModel.VisualState = NewtonndVisualState.HoverPeek;
             }
-            else if (!cursorInside && _viewModel.VisualState == NewtonndVisualState.HoverPeek)
-            {
-                _viewModel.VisualState = NewtonndVisualState.Compact;
-            }
+        }
+        else if (s.HoverToPeek &&
+                 _viewModel.VisualState == NewtonndVisualState.HoverPeek &&
+                 (DateTime.UtcNow - _lastCursorInsideUtc).TotalMilliseconds > 180)
+        {
+            _viewModel.VisualState = NewtonndVisualState.Compact;
         }
 
         // 3. Top-edge mouse reveal when pill is hidden
@@ -277,33 +270,6 @@ public sealed partial class MainWindow : Window
                 _viewModel.CollapseCommand.Execute(null);
             }
             _windowHelper.EnsureTopMost();
-        }
-    }
-
-    private void OnRootPointerEntered(object sender, PointerRoutedEventArgs e)
-    {
-        _isPointerInside = true;
-        _hoverExitTimer.Stop();
-        if (_viewModel.VisualState == NewtonndVisualState.Compact)
-        {
-            if (_settingsService.Current.HoverToPeek)
-            {
-                _viewModel.VisualState = NewtonndVisualState.HoverPeek;
-            }
-            else
-            {
-                AnimateSpringScale(new Vector3(1.035f, 1.035f, 1f), damping: 0.62f, periodMs: 42);
-            }
-        }
-    }
-
-    private void OnRootPointerExited(object sender, PointerRoutedEventArgs e)
-    {
-        _isPointerInside = false;
-        AnimateSpringScale(Vector3.One, damping: 0.7f, periodMs: 45);
-        if (_viewModel.VisualState == NewtonndVisualState.HoverPeek)
-        {
-            _hoverExitTimer.Start();
         }
     }
 

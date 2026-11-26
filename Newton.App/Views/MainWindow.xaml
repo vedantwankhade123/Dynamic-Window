@@ -13,8 +13,6 @@
         DragOver="OnRootDragOver"
         DragLeave="OnRootDragLeave"
         Drop="OnRootDrop"
-        PointerEntered="OnRootPointerEntered"
-        PointerExited="OnRootPointerExited"
         PointerPressed="OnRootPointerPressed"
         PointerReleased="OnRootPointerReleased"
         DoubleTapped="OnRootDoubleTapped">

@@ -53,6 +53,16 @@ public partial class App : Application
     {
         try
         {
+            // Ensure single instance so an older pill never covers the active one
+            var currentPid = Environment.ProcessId;
+            foreach (var p in System.Diagnostics.Process.GetProcessesByName("Newton.App"))
+            {
+                if (p.Id != currentPid)
+                {
+                    try { p.Kill(); } catch { }
+                }
+            }
+
             var settingsService = Services.GetRequiredService<ISettingsService>();
             await settingsService.LoadAsync();
 
