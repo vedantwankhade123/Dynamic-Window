@@ -69,7 +69,7 @@ public sealed partial class MainWindow : Window
             }
         };
 
-        _edgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
+        _edgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(80) };
         _edgeTimer.Tick += OnEdgeTimerTick;
         _edgeTimer.Start();
 
@@ -186,7 +186,22 @@ public sealed partial class MainWindow : Window
             RootShell.Opacity = altDown ? 0.22 : Math.Clamp(s.NewtonndOpacity, 0.4, 1.0);
         }
 
-        // 2. Top-edge mouse reveal when pill is hidden
+        // 2. Reliable Win32 hover-expand across X axis (works even when unfocused)
+        bool cursorInside = _windowHelper.IsCursorInsideWindow();
+        _isPointerInside = cursorInside;
+        if (s.HoverToPeek)
+        {
+            if (cursorInside && _viewModel.VisualState == NewtonndVisualState.Compact)
+            {
+                _viewModel.VisualState = NewtonndVisualState.HoverPeek;
+            }
+            else if (!cursorInside && _viewModel.VisualState == NewtonndVisualState.HoverPeek)
+            {
+                _viewModel.VisualState = NewtonndVisualState.Compact;
+            }
+        }
+
+        // 3. Top-edge mouse reveal when pill is hidden
         if (_isUserHidden || !s.IsNewtonndEnabled)
         {
             bool atTopEdge = _windowHelper.IsCursorAtTopCenterEdge(s);

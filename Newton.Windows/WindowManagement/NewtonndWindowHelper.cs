@@ -125,6 +125,12 @@ public sealed class NewtonndWindowHelper : IDisposable
         EnsureTopMost();
     }
 
+    public bool IsCursorInsideWindow()
+    {
+        if (!GetCursorPos(out var pt) || !GetWindowRect(_hwnd, out var r)) return false;
+        return pt.X >= r.Left && pt.X <= r.Right && pt.Y >= r.Top && pt.Y <= r.Bottom;
+    }
+
     public bool IsCursorAtTopCenterEdge(NewtonSettings settings)
     {
         if (!GetCursorPos(out var pt)) return false;
@@ -200,6 +206,12 @@ public sealed class NewtonndWindowHelper : IDisposable
 
     [StructLayout(LayoutKind.Sequential)]
     private struct POINT { public int X, Y; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT { public int Left, Top, Right, Bottom; }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
