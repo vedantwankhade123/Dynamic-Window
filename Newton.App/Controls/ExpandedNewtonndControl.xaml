@@ -12,6 +12,76 @@
     </UserControl.Resources>
 
     <Grid>
+        <!-- Idle quick panel: opened with Ctrl+N, so the island stays available without an idle pill. -->
+        <Grid Padding="14,12" RowSpacing="8" Visibility="{Binding IsIdleExpanded, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="44" />
+                <RowDefinition Height="44" />
+                <RowDefinition Height="34" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <StackPanel Spacing="1">
+                    <TextBlock Text="Quick controls" FontSize="15" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                    <TextBlock Text="Your Newton Island is ready when you need it." FontSize="10.5" Foreground="#8E8E93" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Right">
+                    <Button Width="28" Height="28" CornerRadius="14" Padding="0" Background="#1C1C1E" BorderBrush="#20FFFFFF" BorderThickness="1" Command="{Binding OpenSettingsCommand}" ToolTipService.ToolTip="Settings">
+                        <ic:SymbolIcon Symbol="Settings" FontSize="12" Foreground="#A1A1AA" />
+                    </Button>
+                    <Button Width="28" Height="28" CornerRadius="14" Padding="0" Background="#1C1C1E" BorderBrush="#20FFFFFF" BorderThickness="1" Command="{Binding CollapseCommand}" ToolTipService.ToolTip="Hide island">
+                        <ic:SymbolIcon Symbol="Dismiss" FontSize="11" Foreground="#A1A1AA" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" ColumnSpacing="8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Button Grid.Column="0" HorizontalContentAlignment="Stretch" Padding="10,5" CornerRadius="13" Background="#1C1C1E" BorderBrush="#20FFFFFF" BorderThickness="1" Command="{Binding ToggleWifiCommand}">
+                    <Grid ColumnSpacing="9">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="10" Background="#25358BEF" VerticalAlignment="Center"><FontIcon Glyph="&#xE701;" FontSize="15" Foreground="#64A9FF" /></Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0"><TextBlock Text="Wi-Fi" FontSize="11.5" FontWeight="SemiBold" Foreground="#F5F5F7" /><TextBlock Text="{Binding WifiStatusLabel}" FontSize="10" Foreground="#9CA3AF" /></StackPanel>
+                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="10" Foreground="#8E8E93" VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+                <Button Grid.Column="1" HorizontalContentAlignment="Stretch" Padding="10,5" CornerRadius="13" Background="#1C1C1E" BorderBrush="#20FFFFFF" BorderThickness="1" Command="{Binding ToggleBluetoothRadioCommand}">
+                    <Grid ColumnSpacing="9">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="10" Background="#243776E8" VerticalAlignment="Center"><FontIcon Glyph="&#xE702;" FontSize="15" Foreground="#78A9FF" /></Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0"><TextBlock Text="Bluetooth" FontSize="11.5" FontWeight="SemiBold" Foreground="#F5F5F7" /><TextBlock Text="{Binding BluetoothStatusLabel}" FontSize="10" Foreground="#9CA3AF" /></StackPanel>
+                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="10" Foreground="#8E8E93" VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+            </Grid>
+            <Grid Grid.Row="2" ColumnSpacing="8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Button Grid.Column="0" HorizontalContentAlignment="Stretch" Padding="10,5" CornerRadius="13" Background="#1C1C1E" BorderBrush="#20FFFFFF" BorderThickness="1" Command="{Binding OpenMicrophonePrivacyCommand}">
+                    <Grid ColumnSpacing="9">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="10" Background="#24BF5AF2" VerticalAlignment="Center"><FontIcon Glyph="&#xE720;" FontSize="15" Foreground="#D6A2FF" /></Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0"><TextBlock Text="Microphone" FontSize="11.5" FontWeight="SemiBold" Foreground="#F5F5F7" /><TextBlock Text="Privacy settings" FontSize="10" Foreground="#9CA3AF" /></StackPanel>
+                    </Grid>
+                </Button>
+                <Button Grid.Column="1" HorizontalContentAlignment="Stretch" Padding="10,5" CornerRadius="13" Background="#1C1C1E" BorderBrush="#20FFFFFF" BorderThickness="1" Command="{Binding OpenCameraPrivacyCommand}">
+                    <Grid ColumnSpacing="9">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="10" Background="#24FF9F0A" VerticalAlignment="Center"><FontIcon Glyph="&#xE714;" FontSize="15" Foreground="#FFC267" /></Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0"><TextBlock Text="Camera" FontSize="11.5" FontWeight="SemiBold" Foreground="#F5F5F7" /><TextBlock Text="Privacy settings" FontSize="10" Foreground="#9CA3AF" /></StackPanel>
+                    </Grid>
+                </Button>
+            </Grid>
+            <Button Grid.Row="3" HorizontalContentAlignment="Stretch" Padding="10,4" CornerRadius="12" Background="#2030D158" BorderBrush="#3330D158" BorderThickness="1" Command="{Binding OpenTackShelfCommand}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE8B7;" FontSize="14" Foreground="#30D158" />
+                        <TextBlock Text="File Shelf" FontSize="11.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                        <TextBlock Text="{Binding ClipboardCountLabel}" FontSize="10.5" Foreground="#9CA3AF" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding QuickControlMessage}" FontSize="9.5" Foreground="#FBBF24" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </Button>
+        </Grid>
+
         <!-- 1. MUSIC CARD -->
         <controls:MusicPlayerControl Visibility="{Binding IsMusicPrimary, Converter={StaticResource BoolToVis}}" />
 
@@ -187,36 +257,54 @@
         </Grid>
 
         <!-- 8. TRANSFER / DOWNLOAD / FILE OP / DEV BUILD PILL -->
-        <Grid Padding="14,8" Visibility="{Binding IsTransferOrBuildPrimary, Converter={StaticResource BoolToVis}}">
+        <Grid Padding="14,9" RowSpacing="8" Visibility="{Binding IsTransferOrBuildPrimary, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#1638BDF8">
+            <Border Grid.Row="0" Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#1638BDF8">
                 <ic:SymbolIcon
-                    Symbol="ArrowDownload"
+                    Symbol="{Binding CompactSymbol}"
                     FontSize="18"
                     Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}}" />
             </Border>
 
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0" Spacing="1">
+            <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="12,0" Spacing="1">
                 <TextBlock Text="{Binding PrimaryActivity.Title}" FontSize="13.5" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{Binding PrimaryActivity.Subtitle}" FontSize="11.5" Foreground="#9CA3AF" TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
             <ProgressRing
+                Grid.Row="0"
                 Grid.Column="2"
                 Width="30" Height="30"
                 IsIndeterminate="False"
                 Minimum="0" Maximum="100"
                 Value="{Binding CompactProgress}"
                 Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}}" />
+
+            <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding PrimaryActivity.Actions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="6" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding Label}" Tag="{Binding ActionId}" Click="OnActionButtonClick" Padding="11,5" CornerRadius="10" Background="#20FFFFFF" BorderBrush="#24FFFFFF" BorderThickness="1" Foreground="#F5F5F7" FontSize="10.5" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
 
         <!-- 10. TACK CLIPBOARD & DROP SHELF -->
-        <Grid Padding="16,14" RowSpacing="10" Visibility="{Binding IsClipboardPrimary, Converter={StaticResource BoolToVis}}">
+        <Grid Padding="14,12" RowSpacing="8" Visibility="{Binding IsClipboardPrimary, Converter={StaticResource BoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -224,11 +312,13 @@
 
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Border Width="22" Height="22" CornerRadius="6" Background="#2430D158">
-                        <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="12" Foreground="#30D158" />
+                    <Border Width="28" Height="28" CornerRadius="10" Background="#2630D158">
+                        <ic:SymbolIcon Symbol="FolderOpen" FontSize="14" Foreground="#30D158" />
                     </Border>
-                    <TextBlock Text="Tack Shelf" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                    <TextBlock Text="Drag items out or click Copy" FontSize="11" Foreground="#8E8E93" VerticalAlignment="Center" />
+                    <StackPanel Spacing="0" VerticalAlignment="Center">
+                        <TextBlock Text="File Shelf" FontSize="13.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                        <TextBlock Text="{Binding ClipboardCountLabel}" FontSize="10" Foreground="#8E8E93" />
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
                     <Button Content="Clear" Padding="8,3" FontSize="11" CornerRadius="8" Background="#1C1C22" BorderThickness="0" Foreground="#9CA3AF" Command="{Binding ClearClipboardCommand}" />
@@ -238,56 +328,60 @@
                 </StackPanel>
             </Grid>
 
-            <ScrollViewer Grid.Row="1" MaxHeight="162" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding ClipboardItems}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border
-                                Background="#15151A"
-                                BorderBrush="#18FFFFFF"
-                                BorderThickness="1"
-                                CornerRadius="10"
-                                Padding="10,7"
-                                Margin="0,0,0,6"
-                                CanDrag="True"
-                                DragStarting="OnShelfItemDragStarting">
-                                <Grid ColumnSpacing="9">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1">
+                <Border Background="#121C1C20" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="16" Padding="18" Visibility="{Binding HasClipboardItems, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="7">
+                        <Border Width="42" Height="42" CornerRadius="15" Background="#2330D158" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE8B7;" FontSize="19" Foreground="#30D158" />
+                        </Border>
+                        <TextBlock Text="Your shelf is empty" FontSize="13" FontWeight="SemiBold" Foreground="#F5F5F7" HorizontalAlignment="Center" />
+                        <TextBlock Text="Drop files here, or copy something to keep it close." FontSize="10.5" Foreground="#9CA3AF" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="250" />
+                        <Button Content="Check clipboard" Padding="12,5" FontSize="10.5" CornerRadius="10" Background="#2430D158" BorderBrush="#3030D158" BorderThickness="1" Foreground="#B7F7C7" Command="{Binding RefreshClipboardCommand}" />
+                    </StackPanel>
+                </Border>
 
-                                    <!-- Thumbnail for Screenshot/Image or Icon for Text/File -->
-                                    <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Center">
-                                        <Border CornerRadius="6" Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}">
-                                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill" />
+                <ScrollViewer MaxHeight="166" VerticalScrollBarVisibility="Auto" Visibility="{Binding HasClipboardItems, Converter={StaticResource BoolToVis}}">
+                    <ItemsControl ItemsSource="{Binding ClipboardItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="2" ItemWidth="184" ItemHeight="84" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#191A1C21" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="14" Padding="8" Margin="0,0,6,6" CanDrag="True" DragStarting="OnShelfItemDragStarting">
+                                    <Grid ColumnSpacing="8" RowSpacing="5">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="42" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                        <Border Grid.RowSpan="2" Width="42" Height="54" CornerRadius="10" Background="#25272D" VerticalAlignment="Center" ClipToBounds="True">
+                                            <Grid>
+                                                <Image Source="{Binding ImagePath}" Stretch="UniformToFill" Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}" />
+                                                <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="#64A9FF" Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}" />
+                                                <FontIcon Glyph="&#xE8A5;" FontSize="18" Foreground="#C4B5FD" Visibility="{Binding IsText, Converter={StaticResource BoolToVis}}" />
+                                            </Grid>
                                         </Border>
-                                        <Border CornerRadius="6" Background="#22FFFFFF" Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
-                                            <ic:SymbolIcon Symbol="DocumentText" FontSize="13" Foreground="#60A5FA" />
-                                        </Border>
+                                        <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock Text="{Binding Preview}" FontSize="10.5" FontWeight="SemiBold" Foreground="#F5F5F7" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                                            <TextBlock Text="{Binding TimeLabel}" FontSize="9.5" Foreground="#8E8E93" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal" Spacing="3" HorizontalAlignment="Right">
+                                            <Button Width="26" Height="22" CornerRadius="8" Padding="0" Background="#2430D158" BorderThickness="0" Foreground="#B7F7C7" Tag="{Binding}" Click="OnShelfCopyClick" ToolTipService.ToolTip="Copy or share">
+                                                <FontIcon Glyph="&#xE8C8;" FontSize="10" />
+                                            </Button>
+                                            <Button Width="26" Height="22" CornerRadius="8" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#A1A1AA" Tag="{Binding Id}" Click="OnShelfPinClick" ToolTipService.ToolTip="Pin">
+                                                <ic:SymbolIcon Symbol="Pin" FontSize="10" />
+                                            </Button>
+                                            <Button Width="26" Height="22" CornerRadius="8" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#A1A1AA" Tag="{Binding Id}" Click="OnShelfRemoveClick" ToolTipService.ToolTip="Remove from shelf">
+                                                <ic:SymbolIcon Symbol="Dismiss" FontSize="9" />
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
-
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0">
-                                        <TextBlock Text="{Binding Preview}" FontSize="12" Foreground="#F5F5F7" TextTrimming="CharacterEllipsis" MaxLines="1" />
-                                        <TextBlock Text="{Binding TimeLabel}" FontSize="10" Foreground="#8E8E93" />
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                        <Button Padding="8,3" FontSize="10.5" CornerRadius="7" Background="#26FFFFFF" BorderThickness="0" Foreground="#FFFFFF" Content="Copy" Tag="{Binding}" Click="OnShelfCopyClick" />
-                                        <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#9CA3AF" Tag="{Binding Id}" Click="OnShelfPinClick" ToolTipService.ToolTip="Pin">
-                                            <ic:SymbolIcon Symbol="Pin" FontSize="11" />
-                                        </Button>
-                                        <Button Width="24" Height="24" CornerRadius="12" Padding="0" Background="Transparent" BorderThickness="0" Foreground="#8E8E93" Tag="{Binding Id}" Click="OnShelfRemoveClick" ToolTipService.ToolTip="Remove">
-                                            <ic:SymbolIcon Symbol="Dismiss" FontSize="10" />
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
         </Grid>
 
         <!-- 9. AI TASK / NOTIFICATION / SYSTEM OP PILL -->

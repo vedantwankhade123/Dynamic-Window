@@ -9,6 +9,7 @@ using Newton.Core.Interfaces;
 using Newton.Core.Models;
 using Newton.Core.Services;
 using Newton.Windows.WindowManagement;
+using Windows.Devices.Radios;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.UI;
@@ -55,6 +56,15 @@ public partial class MainNewtonndViewModel : ObservableObject
     [ObservableProperty]
     private int _customTimerMinutes = 10;
 
+    [ObservableProperty]
+    private bool _isWifiEnabled;
+
+    [ObservableProperty]
+    private bool _isBluetoothEnabled;
+
+    [ObservableProperty]
+    private string _quickControlMessage = string.Empty;
+
     public ObservableCollection<ActivityItem> Activities { get; } = new();
     public ObservableCollection<NotificationItem> Notifications { get; } = new();
     public ObservableCollection<AiMessage> AiMessages { get; } = new();
@@ -63,10 +73,13 @@ public partial class MainNewtonndViewModel : ObservableObject
     public ObservableCollection<ClipboardHistoryItem> ClipboardItems { get; } = new();
 
     public bool IsCompact => VisualState == NewtonndVisualState.Compact;
-    public bool IsHoverPeek => VisualState == NewtonndVisualState.HoverPeek;
-    public bool IsCompactOrHover => VisualState is NewtonndVisualState.Compact or NewtonndVisualState.HoverPeek;
     public bool IsExpanded => VisualState == NewtonndVisualState.Expanded;
+    public bool IsIdleExpanded => IsExpanded && PrimaryActivity is null;
     public bool IsDashboard => VisualState == NewtonndVisualState.Dashboard;
+    public bool HasClipboardItems => ClipboardItems.Count > 0;
+    public string ClipboardCountLabel => ClipboardItems.Count == 1 ? "1 item" : $"{ClipboardItems.Count} items";
+    public string WifiStatusLabel => IsWifiEnabled ? "On" : "Off";
+    public string BluetoothStatusLabel => IsBluetoothEnabled ? "On" : "Off";
 
     public bool IsMusicPrimary => PrimaryActivity?.Type == ActivityType.Music;
     public bool IsTimerPrimary => PrimaryActivity?.Type is ActivityType.Timer or ActivityType.Pomodoro;
@@ -76,7 +89,7 @@ public partial class MainNewtonndViewModel : ObservableObject
     public bool IsBluetoothPrimary => PrimaryActivity?.Type == ActivityType.BluetoothAccessory;
     public bool IsIncomingCallPrimary => PrimaryActivity?.Type == ActivityType.IncomingCall;
     public bool IsClipboardPrimary => PrimaryActivity?.Type == ActivityType.Clipboard;
-    public bool IsTransferOrBuildPrimary => PrimaryActivity?.Type is ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper;
+    public bool IsTransferOrBuildPrimary => PrimaryActivity?.Type is ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.AiGeneration or ActivityType.CustomDeveloper;
     public bool IsAiOrOtherPrimary => PrimaryActivity is not null && !IsMusicPrimary && !IsTimerPrimary && !IsScreenRecordingPrimary && !IsFocusAssistPrimary && !IsLowBatteryPrimary && !IsBluetoothPrimary && !IsIncomingCallPrimary && !IsClipboardPrimary && !IsTransferOrBuildPrimary;
     public bool IsNonMusicPrimary => PrimaryActivity is not null && PrimaryActivity.Type != ActivityType.Music;
 
@@ -116,6 +129,7 @@ public partial class MainNewtonndViewModel : ObservableObject
 
     private string? _lastExtractedArtPath;
     private CancellationTokenSource? _toastCts;
+    private RadioAccessStatus? _radioAccessStatus;
 
     public Symbol CompactSymbol => PrimaryActivity?.Type switch
     {
@@ -196,7 +210,11 @@ public partial class MainNewtonndViewModel : ObservableObject
         });
     }
 
-    public void AttachDispatcher(DispatcherQueue dispatcherQueue) => _dispatcherQueue = dispatcherQueue;
+    public void AttachDispatcher(DispatcherQueue dispatcherQueue)
+    {
+        _dispatcherQueue = dispatcherQueue;
+        _ = RefreshRadioStatesAsync();
+    }
 
     private void RunOnUi(Action action)
     {
@@ -207,15 +225,16 @@ public partial class MainNewtonndViewModel : ObservableObject
     partial void OnVisualStateChanged(NewtonndVisualState value)
     {
         OnPropertyChanged(nameof(IsCompact));
-        OnPropertyChanged(nameof(IsHoverPeek));
-        OnPropertyChanged(nameof(IsCompactOrHover));
         OnPropertyChanged(nameof(IsExpanded));
+        OnPropertyChanged(nameof(IsIdleExpanded));
         OnPropertyChanged(nameof(IsDashboard));
+        if (value == NewtonndVisualState.Expanded) _ = RefreshRadioStatesAsync();
     }
 
     partial void OnPrimaryActivityChanged(ActivityItem? value)
     {
         OnPropertyChanged(nameof(IsMusicPrimary));
+        OnPropertyChanged(nameof(IsIdleExpanded));
         OnPropertyChanged(nameof(IsTimerPrimary));
         OnPropertyChanged(nameof(IsScreenRecordingPrimary));
         OnPropertyChanged(nameof(IsFocusAssistPrimary));
@@ -274,7 +293,71 @@ public partial class MainNewtonndViewModel : ObservableObject
     {
         ClipboardItems.Clear();
         foreach (var item in _clipboardService.Items) ClipboardItems.Add(item);
+        OnPropertyChanged(nameof(HasClipboardItems));
+        OnPropertyChanged(nameof(ClipboardCountLabel));
     }
+
+    private async Task RefreshRadioStatesAsync()
+    {
+        try
+        {
+            var radios = await Radio.GetRadiosAsync();
+            var wifi = radios.FirstOrDefault(r => r.Kind == RadioKind.WiFi);
+            var bluetooth = radios.FirstOrDefault(r => r.Kind == RadioKind.Bluetooth);
+            RunOnUi(() =>
+            {
+                IsWifiEnabled = wifi?.State == RadioState.On;
+                IsBluetoothEnabled = bluetooth?.State == RadioState.On;
+                OnPropertyChanged(nameof(WifiStatusLabel));
+                OnPropertyChanged(nameof(BluetoothStatusLabel));
+            });
+        }
+        catch
+        {
+            RunOnUi(() => QuickControlMessage = "Radio status is unavailable on this device.");
+        }
+    }
+
+    private async Task ToggleRadioAsync(RadioKind kind)
+    {
+        try
+        {
+            _radioAccessStatus ??= await Radio.RequestAccessAsync();
+            if (_radioAccessStatus != RadioAccessStatus.Allowed)
+            {
+                RunOnUi(() => QuickControlMessage = "Windows denied radio control access.");
+                return;
+            }
+
+            var radios = await Radio.GetRadiosAsync();
+            var radio = radios.FirstOrDefault(r => r.Kind == kind);
+            if (radio is null)
+            {
+                RunOnUi(() => QuickControlMessage = $"{kind} radio was not found.");
+                return;
+            }
+
+            var result = await radio.SetStateAsync(radio.State == RadioState.On ? RadioState.Off : RadioState.On);
+            if (result != RadioAccessStatus.Allowed)
+            {
+                RunOnUi(() => QuickControlMessage = $"Windows could not change {kind} state.");
+                return;
+            }
+
+            RunOnUi(() => QuickControlMessage = string.Empty);
+            await Task.Delay(200);
+            await RefreshRadioStatesAsync();
+        }
+        catch
+        {
+            RunOnUi(() => QuickControlMessage = $"{kind} control is unavailable on this device.");
+        }
+    }
+
+    [RelayCommand] private Task ToggleWifiAsync() => ToggleRadioAsync(RadioKind.WiFi);
+    [RelayCommand] private Task ToggleBluetoothRadioAsync() => ToggleRadioAsync(RadioKind.Bluetooth);
+    [RelayCommand] private void OpenMicrophonePrivacy() => LaunchUri("ms-settings:privacy-microphone");
+    [RelayCommand] private void OpenCameraPrivacy() => LaunchUri("ms-settings:privacy-webcam");
 
     [RelayCommand] private void CopyClipboardText(string text) => _clipboardService.CopyText(text);
     [RelayCommand] private async Task CopyClipboardItemAsync(ClipboardHistoryItem? item) { if (item is not null) await _clipboardService.CopyItemAsync(item); }
@@ -402,9 +485,13 @@ public partial class MainNewtonndViewModel : ObservableObject
     private void InitializeQuickControls()
     {
         QuickControls.Clear();
+        QuickControls.Add(new QuickControlItem { Id = "wifi", Title = "Wi-Fi", Subtitle = "Radio control", IconGlyph = "\uE701", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "bt", Title = "Bluetooth", Subtitle = "Radio control", IconGlyph = "\uE702", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "mic", Title = "Microphone", Subtitle = "Privacy settings", IconGlyph = "\uE720", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "camera", Title = "Camera", Subtitle = "Privacy settings", IconGlyph = "\uE714", IsPrototypeOnly = false });
+        QuickControls.Add(new QuickControlItem { Id = "shelf", Title = "File Shelf", Subtitle = "Drop tray", IconGlyph = "\uE8B7", IsPrototypeOnly = false });
         QuickControls.Add(new QuickControlItem { Id = "snip", Title = "Screenshot", Subtitle = "Snipping Tool", IconGlyph = "\uE722", IsPrototypeOnly = false });
         QuickControls.Add(new QuickControlItem { Id = "sound", Title = "Sound", Subtitle = "Windows Audio", IconGlyph = "\uE767", IsPrototypeOnly = false });
-        QuickControls.Add(new QuickControlItem { Id = "bt", Title = "Bluetooth", Subtitle = "Devices", IconGlyph = "\uE702", IsPrototypeOnly = false });
         QuickControls.Add(new QuickControlItem { Id = "focus", Title = "Focus Assist", Subtitle = "Windows DND", IconGlyph = "\uE708", IsPrototypeOnly = false });
         QuickControls.Add(new QuickControlItem { Id = "manage", Title = "Manage Newton", Subtitle = "Control Center", IconGlyph = "\uE9E9", IsPrototypeOnly = false });
         QuickControls.Add(new QuickControlItem { Id = "settings", Title = "Settings", Subtitle = "Preferences", IconGlyph = "\uE713", IsPrototypeOnly = false });
@@ -414,6 +501,7 @@ public partial class MainNewtonndViewModel : ObservableObject
     {
         PrimaryActivity = _activityService.PrimaryActivity;
         RefreshActivities();
+        RefreshClipboard();
         RefreshNotifications();
         RefreshAiMessages();
         AiModels.Clear();
@@ -509,7 +597,11 @@ public partial class MainNewtonndViewModel : ObservableObject
             case "manage": App.OpenManageWindow(); break;
             case "snip": LaunchUri("ms-screenclip:"); break;
             case "sound": LaunchUri("ms-settings:sound"); break;
-            case "bt": LaunchUri("ms-settings:bluetooth"); break;
+            case "wifi": _ = ToggleWifiAsync(); break;
+            case "bt": _ = ToggleBluetoothRadioAsync(); break;
+            case "mic": OpenMicrophonePrivacy(); break;
+            case "camera": OpenCameraPrivacy(); break;
+            case "shelf": OpenTackShelf(); break;
             case "focus": LaunchUri("ms-settings:quiethours"); break;
         }
     }

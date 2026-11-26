@@ -247,7 +247,7 @@ public sealed class WindowsClipboardService : IClipboardService
     public void AddDroppedText(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-        var entry = new ClipboardEntry { Kind = ClipboardItemKind.Text, Text = text, IsPinned = true, Timestamp = DateTimeOffset.Now };
+        var entry = new ClipboardEntry { Kind = ClipboardItemKind.Text, Text = text, Timestamp = DateTimeOffset.Now };
         InsertEntry(entry, notify: true);
     }
 
@@ -259,7 +259,6 @@ public sealed class WindowsClipboardService : IClipboardService
             Kind = ClipboardItemKind.File,
             FilePaths = filePaths.ToList(),
             Text = string.Join(", ", filePaths.Select(Path.GetFileName)),
-            IsPinned = true,
             Timestamp = DateTimeOffset.Now
         };
         InsertEntry(entry, notify: true);

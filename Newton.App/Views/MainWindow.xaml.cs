@@ -3,8 +3,11 @@ using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Newton.App.ViewModels;
 using Newton.Core.Interfaces;
@@ -24,11 +27,13 @@ public sealed partial class MainWindow : Window
     private readonly Compositor _compositor;
     private readonly DispatcherTimer _morphTimer;
     private readonly DispatcherTimer _edgeTimer;
-    private DateTime _lastCursorInsideUtc = DateTime.MinValue;
     private bool _isPointerInside;
-    private bool _isUserHidden;
+    private bool _hasHotKeyOverride;
+    private bool _hotKeyOverrideVisible;
     private bool _isEdgeRevealed;
     private bool _isGhostClickThrough;
+    private bool _isCurrentlyVisible;
+    private bool _isForegroundObstructed;
 
     private double _curW = 216, _curH = 44, _curR = 22;
     private double _startW = 216, _startH = 44, _startR = 22;
@@ -71,6 +76,8 @@ public sealed partial class MainWindow : Window
         ApplyWindowBounds(animate: false);
     }
 
+    public void RefreshIslandVisibility() => ApplyWindowBounds(animate: false);
+
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(MainNewtonndViewModel.VisualState) or nameof(MainNewtonndViewModel.PrimaryActivity))
@@ -110,20 +117,21 @@ public sealed partial class MainWindow : Window
     private void ApplyWindowBounds(bool animate)
     {
         var s = _settingsService.Current;
-        bool shouldShow = (s.IsNewtonndEnabled && !_isUserHidden) || _isEdgeRevealed;
+        bool shouldShow = ShouldShowIsland(s);
         if (!shouldShow)
         {
             _windowHelper.AppWindow.Hide();
+            _isCurrentlyVisible = false;
             return;
         }
 
         _windowHelper.AppWindow.Show(false);
+        _isCurrentlyVisible = true;
         RootShell.Opacity = Math.Clamp(s.NewtonndOpacity, 0.4, 1.0);
 
         var (w, h, r) = _viewModel.VisualState switch
         {
             NewtonndVisualState.Compact => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0),
-            NewtonndVisualState.HoverPeek => (Math.Max(384.0, s.HoverPeekWidth), s.CompactHeight, s.CompactHeight / 2.0),
             NewtonndVisualState.Expanded => GetExpandedDimensions(),
             NewtonndVisualState.Dashboard => (780.0, 560.0, 20.0),
             _ => (s.CompactWidth, s.CompactHeight, s.CompactHeight / 2.0)
@@ -182,15 +190,48 @@ public sealed partial class MainWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            _isUserHidden = !_isUserHidden;
+            var settings = _settingsService.Current;
+            bool isVisible = ShouldShowIsland(settings);
+            _hasHotKeyOverride = true;
+            _hotKeyOverrideVisible = !isVisible;
             _isEdgeRevealed = false;
+            if (_viewModel.PrimaryActivity is null)
+            {
+                _viewModel.VisualState = _hotKeyOverrideVisible
+                    ? NewtonndVisualState.Expanded
+                    : NewtonndVisualState.Compact;
+            }
             ApplyWindowBounds(animate: true);
         });
+    }
+
+    private bool ShouldShowIsland(NewtonSettings settings)
+    {
+        var activity = _viewModel.PrimaryActivity;
+        bool hasLiveActivity = activity?.Status is ActivityStatus.Active or ActivityStatus.Paused or ActivityStatus.Completed or ActivityStatus.Failed;
+        if (!hasLiveActivity)
+        {
+            return activity is null && _viewModel.IsIdleExpanded && _hasHotKeyOverride && _hotKeyOverrideVisible;
+        }
+        if (_isEdgeRevealed) return true;
+        if (_hasHotKeyOverride) return _hotKeyOverrideVisible;
+        if (!settings.IsNewtonndEnabled) return false;
+
+        bool isAgentTask = activity?.Type is ActivityType.AiGeneration or ActivityType.CustomDeveloper;
+        var covered = settings.AutoDodgeBrowserTabs && !isAgentTask && _windowHelper.IsForegroundWindowOverlappingIsland();
+        _isForegroundObstructed = covered;
+        return !covered;
     }
 
     private void OnEdgeTimerTick(object? sender, object e)
     {
         var s = _settingsService.Current;
+        bool foregroundObstructed = s.AutoDodgeBrowserTabs && _windowHelper.IsForegroundWindowOverlappingIsland();
+        if (foregroundObstructed != _isForegroundObstructed)
+        {
+            _isForegroundObstructed = foregroundObstructed;
+            ApplyWindowBounds(animate: !foregroundObstructed);
+        }
 
         // 1. Alt-key click-through ghost mode
         bool altDown = NewtonndWindowHelper.IsAltKeyDown();
@@ -201,29 +242,15 @@ public sealed partial class MainWindow : Window
             RootShell.Opacity = altDown ? 0.22 : Math.Clamp(s.NewtonndOpacity, 0.4, 1.0);
         }
 
-        // 2. Reliable Win32 hover-expand across X axis (single source of truth)
-        bool cursorInside = _windowHelper.IsCursorInsideWindow();
-        _isPointerInside = cursorInside;
-        if (cursorInside)
-        {
-            _lastCursorInsideUtc = DateTime.UtcNow;
-            if (s.HoverToPeek && _viewModel.VisualState == NewtonndVisualState.Compact)
-            {
-                _viewModel.VisualState = NewtonndVisualState.HoverPeek;
-            }
-        }
-        else if (s.HoverToPeek &&
-                 _viewModel.VisualState == NewtonndVisualState.HoverPeek &&
-                 (DateTime.UtcNow - _lastCursorInsideUtc).TotalMilliseconds > 180)
-        {
-            _viewModel.VisualState = NewtonndVisualState.Compact;
-        }
+        // Hover only tracks the revealed window so it can tuck away after the cursor leaves.
+        _isPointerInside = _windowHelper.IsCursorInsideWindow();
 
         // 3. Top-edge mouse reveal when pill is hidden
-        if (_isUserHidden || !s.IsNewtonndEnabled)
+        bool hasLiveActivity = _viewModel.PrimaryActivity?.Status is ActivityStatus.Active or ActivityStatus.Paused or ActivityStatus.Completed;
+        if (hasLiveActivity)
         {
             bool atTopEdge = _windowHelper.IsCursorAtTopCenterEdge(s);
-            if (atTopEdge && !_isEdgeRevealed)
+            if (atTopEdge && !_isCurrentlyVisible && !_isEdgeRevealed)
             {
                 _isEdgeRevealed = true;
                 ApplyWindowBounds(animate: true);
@@ -240,6 +267,7 @@ public sealed partial class MainWindow : Window
     {
         return _viewModel.PrimaryActivity?.Type switch
         {
+            null => (408, 220, 24),
             ActivityType.Music => (368, 152, 22),
             ActivityType.LowBattery => (284, 52, 26),
             ActivityType.Timer or ActivityType.Pomodoro => (360, 128, 22),
@@ -247,8 +275,9 @@ public sealed partial class MainWindow : Window
             ActivityType.FocusAssist => (310, 60, 30),
             ActivityType.BluetoothAccessory => (296, 60, 30),
             ActivityType.IncomingCall => (342, 64, 32),
-            ActivityType.Clipboard => (392, 232, 22),
-            ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall or ActivityType.CustomDeveloper => (340, 64, 32),
+            ActivityType.Clipboard => (408, 244, 22),
+            ActivityType.AiGeneration or ActivityType.CustomDeveloper => (408, 108, 24),
+            ActivityType.Download or ActivityType.FileOperation or ActivityType.AppInstall => (340, 64, 32),
             _ => (356, 72, 22)
         };
     }
@@ -305,6 +334,8 @@ public sealed partial class MainWindow : Window
 
     private void OnRootPointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        if (IsInteractiveSource(e.OriginalSource as DependencyObject)) return;
+
         AnimateSpringScale(new Vector3(0.96f, 0.96f, 1f), damping: 0.75f, periodMs: 36);
 
         var props = e.GetCurrentPoint(RootShell).Properties;
@@ -316,11 +347,22 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
-            if (_viewModel.VisualState is NewtonndVisualState.Compact or NewtonndVisualState.HoverPeek && _settingsService.Current.ClickToExpand)
+            if (_viewModel.VisualState == NewtonndVisualState.Compact && _settingsService.Current.ClickToExpand)
             {
                 _viewModel.VisualState = NewtonndVisualState.Expanded;
             }
         }
+    }
+
+    private bool IsInteractiveSource(DependencyObject? source)
+    {
+        while (source is not null && source != RootShell)
+        {
+            if (source is ButtonBase or TextBoxBase or Slider or ToggleSwitch) return true;
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return false;
     }
 
     private void OnRootPointerReleased(object sender, PointerRoutedEventArgs e)

@@ -16,7 +16,6 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <!-- Left: Real Album Art / Content-Specific Symbol -->
@@ -55,29 +54,8 @@
                     MaxLines="1" />
             </StackPanel>
 
-            <!-- Horizontal Hover-Expand Quick Controls (Play/Pause, Previous, Forward) -->
-            <StackPanel
-                Grid.Column="2"
-                Orientation="Horizontal"
-                Spacing="4"
-                VerticalAlignment="Center"
-                Visibility="{Binding IsHoverPeek, Converter={StaticResource BoolToVis}}">
-                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding PreviousTrackCommand}" ToolTipService.ToolTip="Previous">
-                    <ic:SymbolIcon Symbol="Previous" FontSize="12" />
-                </Button>
-                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#2C2C35" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding TogglePlayPauseCommand}" ToolTipService.ToolTip="Play / Pause">
-                    <ic:SymbolIcon Symbol="{Binding PlayPauseSymbol}" FontSize="12" />
-                </Button>
-                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#FFFFFF" Command="{Binding NextTrackCommand}" ToolTipService.ToolTip="Next">
-                    <ic:SymbolIcon Symbol="Next" FontSize="12" />
-                </Button>
-                <Button Width="26" Height="26" CornerRadius="13" Padding="0" Background="#1C1C22" BorderThickness="0" Foreground="#30D158" Command="{Binding OpenTackShelfCommand}" ToolTipService.ToolTip="Tack Shelf">
-                    <ic:SymbolIcon Symbol="ClipboardPaste" FontSize="12" />
-                </Button>
-            </StackPanel>
-
-            <!-- Right: Platform Logo / Progress Ring (No Waveform) -->
-            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="2,0,0,0">
+            <!-- Compact glance status -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="2,0,0,0">
                 <Border
                     Width="20" Height="20" CornerRadius="10"
                     Background="#1FFFFFFF"
@@ -94,7 +72,7 @@
                     Maximum="100"
                     Value="{Binding CompactProgress}"
                     Foreground="{Binding PrimaryActivity.AccentHex, Converter={StaticResource HexToBrush}, FallbackValue='#60A5FA'}"
-                    Visibility="{Binding IsNonMusicPrimary, Converter={StaticResource BoolToVis}}" />
+                    Visibility="{Binding HasCompactProgress, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
         </Grid>
     </Grid>

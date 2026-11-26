@@ -51,10 +51,10 @@
             RenderTransformOrigin="0.5,0">
 
             <Grid>
-                <!-- Compact & Horizontal HoverPeek State -->
+                <!-- Compact glance state -->
                 <controls:CompactNewtonndControl
                     x:Name="CompactView"
-                    Visibility="{Binding IsCompactOrHover, Converter={StaticResource BoolToVis}}" />
+                    Visibility="{Binding IsCompact, Converter={StaticResource BoolToVis}}" />
 
                 <!-- Expanded State -->
                 <controls:ExpandedNewtonndControl
@@ -75,7 +75,7 @@
                     Visibility="{Binding IsDragOver, Converter={StaticResource BoolToVis}}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
                         <ic:SymbolIcon Symbol="Pin" FontSize="15" Foreground="#30D158" />
-                        <TextBlock Text="Drop to Tack to Newton" FontSize="12.5" FontWeight="SemiBold" Foreground="#30D158" />
+                        <TextBlock Text="Drop files or text into your File Shelf" FontSize="12.5" FontWeight="SemiBold" Foreground="#30D158" />
                     </StackPanel>
                 </Border>
             </Grid>

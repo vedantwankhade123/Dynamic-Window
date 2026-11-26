@@ -23,6 +23,7 @@ public sealed class RealTimerAndNotificationService : INotificationService, ITim
     private int _remainingSeconds;
     private bool _isRunning;
     private bool _hasActiveTimer;
+    private DateTimeOffset? _completedAt;
     private string _label = "Focus Timer";
     private bool _isPomodoro;
 
@@ -53,6 +54,19 @@ public sealed class RealTimerAndNotificationService : INotificationService, ITim
 
     private void OnTick(object? state)
     {
+        // Keep a finished timer visible briefly so the completion state can be read,
+        // then end the live activity just as other time-bounded activities do.
+        if (_completedAt is { } completedAt)
+        {
+            if (DateTimeOffset.UtcNow - completedAt >= TimeSpan.FromSeconds(8))
+            {
+                _completedAt = null;
+                _hasActiveTimer = false;
+                _activityManager.RemoveActivity("newton-timer");
+            }
+            return;
+        }
+
         if (!_hasActiveTimer || !_isRunning) return;
 
         _remainingSeconds = Math.Max(0, _remainingSeconds - 1);
@@ -61,6 +75,7 @@ public sealed class RealTimerAndNotificationService : INotificationService, ITim
         if (_remainingSeconds == 0)
         {
             _isRunning = false;
+            _completedAt = DateTimeOffset.UtcNow;
             PushNotification(new NotificationItem
             {
                 AppName = "Newton Timer",
@@ -80,6 +95,7 @@ public sealed class RealTimerAndNotificationService : INotificationService, ITim
         _label = label;
         _isPomodoro = isPomodoro;
         _hasActiveTimer = true;
+        _completedAt = null;
         _isRunning = true;
         PublishTimerActivity();
         _activityManager.SetPrimaryActivity("newton-timer");
@@ -103,6 +119,7 @@ public sealed class RealTimerAndNotificationService : INotificationService, ITim
     public void StopTimer()
     {
         _hasActiveTimer = false;
+        _completedAt = null;
         _isRunning = false;
         _remainingSeconds = 0;
         _activityManager.RemoveActivity("newton-timer");

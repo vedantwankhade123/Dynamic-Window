@@ -1,10 +1,15 @@
 using Newton.App.ViewModels;
 using Newton.App.Views;
+using Newton.App.Services;
 using Newton.Core.Interfaces;
+using Newton.Core.Services;
 using Newton.Infrastructure.DependencyInjection;
 using Newton.Windows.Clipboard;
+using Newton.Windows.Activities;
 using Newton.Windows.Media;
+using Newton.Windows.Startup;
 using Newton.Windows.SystemMonitoring;
+using Newton.Windows.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -14,8 +19,11 @@ namespace Newton.App;
 public partial class App : Application
 {
     private Window? _mainWindow;
-    private SettingsWindow? _settingsWindow;
     private ManageWindow? _manageWindow;
+    private NewtonActivityBridge? _activityBridge;
+    private UniversalReplyService? _chatNotifications;
+    private NewtonChatActivityAdapter? _chatActivityAdapter;
+    private Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
 
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -28,6 +36,8 @@ public partial class App : Application
         services.AddSingleton<IMusicService, WindowsMediaService>();
         services.AddSingleton<ISystemMonitorService, WindowsSystemMonitorService>();
         services.AddSingleton<IClipboardService, WindowsClipboardService>();
+        services.AddSingleton<WindowsStartupService>();
+        services.AddSingleton<NewtonActivityBridge>();
         services.AddSingleton<MainNewtonndViewModel>();
         services.AddTransient<SettingsViewModel>();
         Services = services.BuildServiceProvider();
@@ -66,9 +76,24 @@ public partial class App : Application
             var settingsService = Services.GetRequiredService<ISettingsService>();
             await settingsService.LoadAsync();
 
+            if (!settingsService.Current.StartupPreferenceInitialized)
+            {
+                settingsService.Current.StartWithWindows = true;
+                settingsService.Current.StartupPreferenceInitialized = true;
+                await settingsService.SaveAsync(settingsService.Current);
+            }
+
+            var startupService = Services.GetRequiredService<WindowsStartupService>();
+            startupService.SetEnabled(settingsService.Current.StartWithWindows);
+            settingsService.SettingsChanged += (_, settings) => startupService.SetEnabled(settings.StartWithWindows);
+
+            _activityBridge = Services.GetRequiredService<NewtonActivityBridge>();
+            _activityBridge.Start();
+
+            _uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             _mainWindow = new MainWindow();
             _mainWindow.Activate();
-            OpenManageWindow();
+            ((MainWindow)_mainWindow).RefreshIslandVisibility();
         }
         catch (Exception ex)
         {
@@ -78,16 +103,48 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Call this from a user-initiated Newton command to enable notification access.
+    /// The listener asks Windows for consent and publishes messages through the activity adapter.
+    /// </summary>
+    public static async Task<bool> EnableChatNotificationsAsync()
+    {
+        if (Current is not App app || app._uiDispatcher is null) return false;
+        if (app._chatNotifications is not null) return true;
+
+        NewtonChatActivityAdapter? adapter = null;
+        UniversalReplyService? service;
+        try
+        {
+            service = await UniversalReplyService.CreateAsync(
+                app._uiDispatcher,
+                onCreated: created => adapter = new NewtonChatActivityAdapter(
+                    created,
+                    Services.GetRequiredService<ActivityManager>()));
+        }
+        catch (Exception ex)
+        {
+            Services.GetService<ILogger<App>>()?.LogWarning(ex, "Chat notification access could not be initialized.");
+            adapter?.Dispose();
+            return false;
+        }
+        if (service is null) return false;
+
+        app._chatNotifications = service;
+        app._chatActivityAdapter = adapter;
+        return true;
+    }
+
     public static void OpenSettingsWindow()
     {
         if (Current is not App app) return;
-
-        if (app._settingsWindow is null)
+        if (app._manageWindow is null)
         {
-            app._settingsWindow = new SettingsWindow();
-            app._settingsWindow.Closed += (_, _) => app._settingsWindow = null;
+            app._manageWindow = new ManageWindow();
+            app._manageWindow.Closed += (_, _) => app._manageWindow = null;
         }
-        app._settingsWindow.Activate();
+        app._manageWindow.NavigateToSettings();
+        app._manageWindow.Activate();
     }
 
     public static void OpenManageWindow()

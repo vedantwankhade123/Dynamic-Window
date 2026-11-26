@@ -21,7 +21,21 @@ public sealed partial class ManageWindow : Window
             fe.DataContext = App.Services.GetRequiredService<MainNewtonndViewModel>();
         }
 
+        SettingsWorkspace.DataContext = App.Services.GetRequiredService<SettingsViewModel>();
+
         ConfigureDarkTitleBar();
+    }
+
+    public void NavigateToSettings()
+    {
+        ManageWorkspace.Visibility = Visibility.Collapsed;
+        SettingsWorkspace.Visibility = Visibility.Visible;
+    }
+
+    private void OnSettingsBackRequested(object sender, EventArgs e)
+    {
+        SettingsWorkspace.Visibility = Visibility.Collapsed;
+        ManageWorkspace.Visibility = Visibility.Visible;
     }
 
     private void ConfigureDarkTitleBar()

@@ -1,21 +1,19 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Newton.App.ViewModels;
-using Windows.Graphics;
 using Windows.UI;
-using WinRT.Interop;
 
 namespace Newton.App.Views;
 
-public sealed partial class SettingsWindow : Window
+public sealed partial class SettingsPanel : UserControl
 {
     private readonly SettingsViewModel _viewModel;
 
-    public SettingsWindow()
+    public event EventHandler? BackRequested;
+
+    public SettingsPanel()
     {
         InitializeComponent();
         _viewModel = App.Services.GetRequiredService<SettingsViewModel>();
@@ -24,27 +22,10 @@ public sealed partial class SettingsWindow : Window
             fe.DataContext = _viewModel;
         }
 
-        ConfigureDarkTitleBar();
         UpdateThemeCardBorders();
     }
 
-    private void ConfigureDarkTitleBar()
-    {
-        var hwnd = WindowNative.GetWindowHandle(this);
-        var appWindow = AppWindow.GetFromWindowId(Win32Interop.GetWindowIdFromWindow(hwnd));
-        appWindow.Resize(new SizeInt32(980, 650));
-
-        ExtendsContentIntoTitleBar = true;
-        SetTitleBar(SettingsTitleBar);
-
-        var tb = appWindow.TitleBar;
-        tb.ButtonBackgroundColor = Colors.Transparent;
-        tb.ButtonInactiveBackgroundColor = Colors.Transparent;
-        tb.ButtonForegroundColor = Color.FromArgb(255, 229, 229, 234);
-        tb.ButtonInactiveForegroundColor = Color.FromArgb(255, 142, 142, 147);
-        tb.ButtonHoverBackgroundColor = Color.FromArgb(30, 255, 255, 255);
-        tb.ButtonHoverForegroundColor = Colors.White;
-    }
+    private void OnBackRequested(object sender, RoutedEventArgs e) => BackRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnSectionClick(object sender, RoutedEventArgs e)
     {
@@ -91,7 +72,7 @@ public sealed partial class SettingsWindow : Window
 
     private void UpdateThemeCardBorders()
     {
-        var active = new SolidColorBrush(Color.FromArgb(255, 99, 102, 241));
+        var active = new SolidColorBrush(Color.FromArgb(255, 10, 132, 255));
         var inactive = new SolidColorBrush(Color.FromArgb(36, 255, 255, 255));
 
         ThemeCardDark.BorderBrush = _viewModel.ThemeIndex == 0 ? active : inactive;

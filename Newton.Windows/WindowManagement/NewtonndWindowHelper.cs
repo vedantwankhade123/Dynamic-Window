@@ -131,6 +131,18 @@ public sealed class NewtonndWindowHelper : IDisposable
         return pt.X >= r.Left && pt.X <= r.Right && pt.Y >= r.Top && pt.Y <= r.Bottom;
     }
 
+    public bool IsForegroundWindowOverlappingIsland()
+    {
+        var foreground = GetForegroundWindow();
+        if (foreground == IntPtr.Zero || foreground == _hwnd) return false;
+        if (!GetWindowRect(foreground, out var foregroundRect) || !GetWindowRect(_hwnd, out var islandRect)) return false;
+
+        return foregroundRect.Left < islandRect.Right &&
+               foregroundRect.Right > islandRect.Left &&
+               foregroundRect.Top < islandRect.Bottom &&
+               foregroundRect.Bottom > islandRect.Top;
+    }
+
     public bool IsCursorAtTopCenterEdge(NewtonSettings settings)
     {
         if (!GetCursorPos(out var pt)) return false;
@@ -245,6 +257,9 @@ public sealed class NewtonndWindowHelper : IDisposable
 
     [DllImport("user32.dll")]
     private static extern bool GetCursorPos(out POINT lpPoint);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);

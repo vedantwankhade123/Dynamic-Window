@@ -18,7 +18,6 @@ public enum NewtonPositionMode
 public enum NewtonndVisualState
 {
     Compact,
-    HoverPeek,
     Expanded,
     Dashboard
 }
@@ -26,7 +25,8 @@ public enum NewtonndVisualState
 public sealed class NewtonSettings
 {
     // General
-    public bool StartWithWindows { get; set; } = false;
+    public bool StartWithWindows { get; set; } = true;
+    public bool StartupPreferenceInitialized { get; set; }
     public bool IsNewtonndEnabled { get; set; } = true;
     public bool ShowOnStartup { get; set; } = true;
     public string Language { get; set; } = "English (US)";
@@ -38,7 +38,6 @@ public sealed class NewtonSettings
     public double CornerRadius { get; set; } = 22;
     public double CompactWidth { get; set; } = 220;
     public double CompactHeight { get; set; } = 44;
-    public double HoverPeekWidth { get; set; } = 356;
     public double AnimationSpeed { get; set; } = 1.0;
     public bool EnableBlur { get; set; } = true;
 
@@ -51,7 +50,6 @@ public sealed class NewtonSettings
     // Interactions
     public bool ClickToExpand { get; set; } = true;
     public bool DoubleClickForDashboard { get; set; } = true;
-    public bool HoverToPeek { get; set; } = true;
     public string ToggleShortcut { get; set; } = "Ctrl + N";
     public int AutoCollapseSeconds { get; set; } = 0;
     public bool ClickOutsideToCollapse { get; set; } = true;
